@@ -7,7 +7,7 @@ const Header = () => {
     <header className="py-8">
       <div className="container mx-auto flex flex-col items-center">
         <div className="logo mb-8">
-          <Link href="/" legacyBehavior>
+          <Link href="/" passHref legacyBehavior>
             <a>
               <Image
                 src="/logo.png"
@@ -22,29 +22,29 @@ const Header = () => {
         <nav>
           <ul className="flex space-x-6 text-lg">
             <li>
-              <Link href="/about" legacyBehavior>
+              <Link href="/about" passHref legacyBehavior>
                 <a className="text-gray-600 hover:text-gray-900">About</a>
               </Link>
             </li>
             <li>
-              <Link href="/species" legacyBehavior>
+              <Link href="/species" passHref legacyBehavior>
                 <a className="text-gray-600 hover:text-gray-900">Species</a>
               </Link>
             </li>
             <li>
-              <Link href="/community" legacyBehavior>
+              <Link href="/community" passHref legacyBehavior>
                 <a className="text-gray-600 hover:text-gray-900">Community</a>
               </Link>
             </li>
             <li>
-              <Link href="/contact" legacyBehavior>
+              <Link href="/contact" passHref legacyBehavior>
                 <a className="text-gray-600 hover:text-gray-900">Contact</a>
               </Link>
             </li>
           </ul>
         </nav>
         <div className="auth mt-8">
-          <Link href="/login" legacyBehavior>
+          <Link href="/login" passHref legacyBehavior>
             <a className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full">
               Login
             </a>
