@@ -1,4 +1,5 @@
 // pages/community.js
+import Link from 'next/link';
 import { useState } from 'react';
 
 const CommunityPage = () => {
@@ -41,9 +42,9 @@ const CommunityPage = () => {
                   By {post.author} | {post.date}
                 </p>
                 <p className="text-zinc-800">{post.content}</p>
-                <a href={`/community/post/${post.id}`} className="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <Link href={`/community/post/${post.id}`} className="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                   Read More
-                </a>
+                </Link>
               </div>
             ))}
           </div>
@@ -63,9 +64,9 @@ const CommunityPage = () => {
           <p className="text-xl text-zinc-600 mb-8">
             Share your knowledge, experiences, and stories with the TheraGuild community.
           </p>
-          <a href="/community/create-post" className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full">
+          <Link href="/community/create-post" className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full">
             Create a Post
-          </a>
+          </Link>
         </div>
       </section>
     </div>
