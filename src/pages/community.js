@@ -24,7 +24,7 @@ const CommunityPage = () => {
     <div className="community-page">
       <section className="hero bg-zinc-900 py-16">
         <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">TheraGuild Community</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">ArachneGuild Community</h1>
           <p className="text-xl text-zinc-300 mb-8">
             Connect with fellow tarantula enthusiasts, share your experiences, and learn from the community.
           </p>
@@ -42,7 +42,7 @@ const CommunityPage = () => {
                   By {post.author} | {post.date}
                 </p>
                 <p className="text-zinc-800">{post.content}</p>
-                <Link href={`/community/post/${post.id}`} className="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <Link href={`/community/post/${post.id}`} className="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" legacyBehavior>
                   Read More
                 </Link>
               </div>
@@ -62,9 +62,9 @@ const CommunityPage = () => {
         <div className="container mx-auto text-center">
           <h2 className="text-3xl font-bold mb-8">Contribute to the Community</h2>
           <p className="text-xl text-zinc-600 mb-8">
-            Share your knowledge, experiences, and stories with the TheraGuild community.
+            Share your knowledge, experiences, and stories with the ArachneGuild community.
           </p>
-          <Link href="/community/create-post" className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full">
+          <Link href="/community/create-post" className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full" legacyBehavior>
             Create a Post
           </Link>
         </div>

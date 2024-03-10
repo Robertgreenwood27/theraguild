@@ -9,8 +9,8 @@ export default function LandingPage() {
   return (
     <div>
       <Head>
-        <title>TheraGuild - A Community for Tarantula Enthusiasts</title>
-        <meta name="description" content="Discover, learn, and share knowledge about tarantulas with TheraGuild, the ultimate platform for tarantula enthusiasts worldwide." />
+        <title>ArachneGuild - A Community for Tarantula Enthusiasts</title>
+        <meta name="description" content="Discover, learn, and share knowledge about tarantulas with ArachneGuild, the ultimate platform for tarantula enthusiasts worldwide." />
       </Head>
       <Hero />
       <FeaturedSpecies />

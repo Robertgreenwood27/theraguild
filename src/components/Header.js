@@ -11,7 +11,7 @@ const Header = () => {
             <a>
               <Image
                 src="/logo.png"
-                alt="TheraGuild Logo"
+                alt="ArachneGuild Logo"
                 width={400}
                 height={150}
                 className="w-auto h-auto"
