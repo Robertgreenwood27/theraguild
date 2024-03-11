@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import SpeciesList from '@/components/SpeciesList';
+import HeaderTwo from '@/components/HeaderTwo';
 
 const SpeciesPage = () => {
   const allSpecies = [
@@ -47,6 +48,8 @@ const SpeciesPage = () => {
   };
 
   return (
+    <>
+    <HeaderTwo/>
     <div className="species-page">
       <section className="hero bg-zinc-900 py-16 center">
         <div className="container mx-auto text-center">
@@ -103,6 +106,7 @@ const SpeciesPage = () => {
         </div>
       </section>
     </div>
+    </>
   );
 };
 

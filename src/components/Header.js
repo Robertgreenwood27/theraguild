@@ -1,11 +1,10 @@
-// components/Header.js
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const Header = () => {
   return (
-    <header className="py-8">
-      <div className="container mx-auto flex flex-col items-center">
+    <header className="py-8 relative" style={{ backgroundImage: "url('cobwebsdark.png')", backgroundSize: "cover", backgroundPosition: "center" }}>
+      <div className="container mx-auto flex flex-col items-center relative z-10">
         <div className="logo mb-8">
           <Link href="/" passHref legacyBehavior>
             <a>
@@ -23,22 +22,22 @@ const Header = () => {
           <ul className="flex space-x-6 text-lg">
             <li>
               <Link href="/about" passHref legacyBehavior>
-                <a className="text-gray-600 hover:text-gray-900">About</a>
+                <a className="text-zinc-100 hover:text-zinc-300">About</a>
               </Link>
             </li>
             <li>
               <Link href="/species" passHref legacyBehavior>
-                <a className="text-gray-600 hover:text-gray-900">Species</a>
+                <a className="text-zinc-100 hover:text-zinc-300">Species</a>
               </Link>
             </li>
             <li>
               <Link href="/community" passHref legacyBehavior>
-                <a className="text-gray-600 hover:text-gray-900">Community</a>
+                <a className="text-zinc-100 hover:text-zinc-300">Community</a>
               </Link>
             </li>
             <li>
               <Link href="/contact" passHref legacyBehavior>
-                <a className="text-gray-600 hover:text-gray-900">Contact</a>
+                <a className="text-zinc-100 hover:text-zinc-300">Contact</a>
               </Link>
             </li>
           </ul>
@@ -51,6 +50,7 @@ const Header = () => {
           </Link>
         </div>
       </div>
+      <div className="absolute top-0 left-0 w-full h-full bg-black opacity-30"></div>
     </header>
   );
 };

@@ -2,8 +2,8 @@ import Link from 'next/link';
 
 const CtaSection = () => {
   return (
-    <section className="cta-section bg-blue-600 py-16">
-      <div className="container mx-auto text-center">
+    <section className="cta-section relative" style={{ backgroundImage: "url('cobwebsblue.png')", backgroundSize: "cover", backgroundPosition: "center" }}>
+      <div className="container mx-auto text-center py-16 relative z-10">
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-8">
           Join the ArachneGuild Community
         </h2>
@@ -23,6 +23,7 @@ const CtaSection = () => {
           </Link>
         </div>
       </div>
+      <div className="absolute top-0 left-0 w-full h-full bg-black opacity-30"></div>
     </section>
   );
 };

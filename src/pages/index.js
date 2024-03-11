@@ -4,6 +4,7 @@ import Hero from '../components/Hero';
 import FeaturedSpecies from '../components/FeaturedSpecies';
 import CtaSection from '../components/CtaSection';
 import Footer from '../components/Footer';
+import Header from '@/components/Header';
 
 export default function LandingPage() {
   return (
@@ -12,6 +13,7 @@ export default function LandingPage() {
         <title>ArachneGuild - A Community for Tarantula Enthusiasts</title>
         <meta name="description" content="Discover, learn, and share knowledge about tarantulas with ArachneGuild, the ultimate platform for tarantula enthusiasts worldwide." />
       </Head>
+      <Header/>
       <Hero />
       <FeaturedSpecies />
       <CtaSection />

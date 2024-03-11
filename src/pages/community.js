@@ -1,4 +1,5 @@
 // pages/community.js
+import HeaderTwo from '@/components/HeaderTwo';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -21,6 +22,8 @@ const CommunityPage = () => {
     // Add more post objects as needed
   ]);
   return (
+    <>
+    <HeaderTwo/>
     <div className="community-page">
       <section className="hero bg-zinc-900 py-16">
         <div className="container mx-auto text-center">
@@ -70,6 +73,7 @@ const CommunityPage = () => {
         </div>
       </section>
     </div>
+    </>
   );
 };
 

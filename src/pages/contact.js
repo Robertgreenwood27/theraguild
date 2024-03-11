@@ -1,3 +1,4 @@
+import HeaderTwo from '@/components/HeaderTwo';
 import React, { useState } from 'react';
 
 const Contact = () => {
@@ -42,6 +43,8 @@ const Contact = () => {
   };
 
   return (
+    <>
+    <HeaderTwo/>
     <div className="min-h-screen flex flex-col items-center justify-center py-10">
       <div className="max-w-lg mx-auto bg-transparent rounded-lg p-8">
         <h1 className="text-4xl font-bold mb-6 text-white">Contact Me</h1>
@@ -100,6 +103,7 @@ const Contact = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

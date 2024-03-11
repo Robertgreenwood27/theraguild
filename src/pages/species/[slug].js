@@ -2,6 +2,7 @@
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Chat from '@/components/Chat';
+import HeaderTwo from '@/components/HeaderTwo';
 
 const MissingData = ({ children }) => (
   <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-md">
@@ -31,6 +32,8 @@ const SpeciesDetail = () => {
   }
 
   return (
+    <>
+    <HeaderTwo/>
     <div className="species-detail">
       <section className="hero bg-zinc-900 py-16">
         <div className="container mx-auto">
@@ -106,6 +109,7 @@ const SpeciesDetail = () => {
         </div>
       </section>
     </div>
+    </>
   );
 };
 

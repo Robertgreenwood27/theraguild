@@ -1,8 +1,11 @@
 // pages/about.js
+import HeaderTwo from '@/components/HeaderTwo';
 import Image from 'next/image';
 
 const AboutPage = () => {
   return (
+    <>
+    <HeaderTwo/>
     <div className="about-page">
       <section className="hero bg-zinc-900 py-16">
         <div className="container mx-auto text-center">
@@ -82,6 +85,7 @@ const AboutPage = () => {
         </div>
       </section>
     </div>
+    </>
   );
 };
 
