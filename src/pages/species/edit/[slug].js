@@ -4,6 +4,7 @@ import { initAdmin } from '../../../../firebaseAdmin';
 import { storage } from '../../../../firebase-config';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { useAuth } from '../../../components/AuthProvider';
+import HeaderTwo from '@/components/HeaderTwo';
 
 export async function getServerSideProps(context) {
   const { slug } = context.params;
@@ -33,19 +34,18 @@ export async function getServerSideProps(context) {
 }
 
 const EditSpeciesPage = ({ species }) => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(species);
   const [galleryImages, setGalleryImages] = useState(species.images || []);
 
   useEffect(() => {
-    if (user) {
-      console.log(`editSpecies.js loaded. Current user: ${user.email}`);
-    } else {
-      console.log('editSpecies.js loaded. No user is currently authenticated.');
+    if (!authLoading && !user) {
+      // Redirect to the login page if the user is not authenticated
+      router.push('/login');
     }
-  }, [user]);
+  }, [user, authLoading, router]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -157,11 +157,154 @@ const EditSpeciesPage = ({ species }) => {
     setLoading(false);
   };
 
+  if (authLoading) {
+    // Show a loading state while checking the user's authentication status
+    return <div>Loading...</div>;
+  }
+
   return (
+    <>
+    <HeaderTwo/>
     <div className="container mx-auto">
       <h1 className="text-2xl font-bold mb-4">Edit Species</h1>
       <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-        {/* ... existing form fields ... */}
+      <div>
+  <label htmlFor="altName" className="block mb-1 font-bold">
+    Alternative Name:
+  </label>
+  <input
+    type="text"
+    id="altName"
+    name="altName"
+    value={formData.altName}
+    onChange={handleChange}
+    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+  />
+</div>
+<div>
+  <label htmlFor="maxBodyLength" className="block mb-1 font-bold">
+    Max Body Length (cm):
+  </label>
+  <input
+    type="number"
+    id="maxBodyLength"
+    name="maxBodyLength"
+    value={formData.maxBodyLength}
+    onChange={handleChange}
+    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+    step="0.1"
+  />
+</div>
+<div>
+  <label htmlFor="maxLegSpan" className="block mb-1 font-bold">
+    Max Leg Span (cm):
+  </label>
+  <input
+    type="number"
+    id="maxLegSpan"
+    name="maxLegSpan"
+    value={formData.maxLegSpan}
+    onChange={handleChange}
+    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+    step="0.1"
+  />
+</div>
+<div>
+  <label htmlFor="lifespan" className="block mb-1 font-bold">
+    Lifespan (years):
+  </label>
+  <input
+    type="number"
+    id="lifespan"
+    name="lifespan"
+    value={formData.lifespan}
+    onChange={handleChange}
+    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+  />
+</div>
+<div>
+  <label htmlFor="distribution" className="block mb-1 font-bold">
+    Distribution:
+  </label>
+  <input
+    type="text"
+    id="distribution"
+    name="distribution"
+    value={formData.distribution}
+    onChange={handleChange}
+    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+  />
+</div>
+<div>
+  <label htmlFor="habitat" className="block mb-1 font-bold">
+    Habitat:
+  </label>
+  <input
+    type="text"
+    id="habitat"
+    name="habitat"
+    value={formData.habitat}
+    onChange={handleChange}
+    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+  />
+</div>
+<div>
+  <label htmlFor="temperament" className="block mb-1 font-bold">
+    Temperament:
+  </label>
+  <input
+    type="text"
+    id="temperament"
+    name="temperament"
+    value={formData.temperament}
+    onChange={handleChange}
+    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+  />
+</div>
+<div>
+  <label htmlFor="urticatingSetae" className="block mb-1 font-bold">
+    Urticating Setae:
+  </label>
+  <input
+    type="text"
+    id="urticatingSetae"
+    name="urticatingSetae"
+    value={formData.urticatingSetae}
+    onChange={handleChange}
+    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+  />
+</div>
+<div>
+  <label htmlFor="venomPotency" className="block mb-1 font-bold">
+    Venom Potency:
+  </label>
+  <input
+    type="text"
+    id="venomPotency"
+    name="venomPotency"
+    value={formData.venomPotency}
+    onChange={handleChange}
+    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+  />
+</div>
+<div>
+  <label htmlFor="keepingDifficulty" className="block mb-1 font-bold">
+    Keeping Difficulty:
+  </label>
+  <select
+    id="keepingDifficulty"
+    name="keepingDifficulty"
+    value={formData.keepingDifficulty}
+    onChange={handleChange}
+    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+  >
+    <option value="">Select difficulty</option>
+    <option value="Beginner">Beginner</option>
+    <option value="Intermediate">Intermediate</option>
+    <option value="Advanced">Advanced</option>
+    <option value="Expert">Expert</option>
+  </select>
+</div>
 
         <div className="col-span-2">
           <label htmlFor="primaryImage" className="block mb-1 font-bold">
@@ -221,6 +364,7 @@ const EditSpeciesPage = ({ species }) => {
         </div>
       </form>
     </div>
+    </>
   );
 };
 
