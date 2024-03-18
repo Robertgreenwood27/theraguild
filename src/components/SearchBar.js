@@ -1,4 +1,3 @@
-// components/SearchBar.js
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { db } from '../../firebase-config';
@@ -17,7 +16,13 @@ const SearchBar = () => {
         const speciesRef = collection(db, 'species');
         const speciesSnapshot = await getDocs(speciesRef);
         const speciesData = speciesSnapshot.docs.map((doc) => doc.data());
-        setSpecies(speciesData);
+        const sortedSpeciesData = speciesData.sort((a, b) => {
+          if (a.genus === b.genus) {
+            return a.species.localeCompare(b.species); // Sort by species if genera are the same
+          }
+          return a.genus.localeCompare(b.genus); // Sort by genus
+        });
+        setSpecies(sortedSpeciesData);
       } catch (error) {
         console.error('Error fetching species:', error);
       }
@@ -27,8 +32,8 @@ const SearchBar = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = species.filter((species) =>
-      `${species.genus} ${species.species}`.toLowerCase().includes(searchQuery.toLowerCase())
+    const filtered = species.filter((s) =>
+      `${s.genus} ${s.species}`.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredSpecies(filtered);
   }, [searchQuery, species]);
@@ -84,14 +89,14 @@ const SearchBar = () => {
         </button>
       </form>
       {showDropdown && (
-        <ul className="absolute z-10 w-full mt-1 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg">
+        <ul className="absolute z-10 w-full mt-1 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg overflow-auto max-h-60">
           {filteredSpecies.map((species) => (
             <li
               key={species.id}
               onClick={() => handleSpeciesClick(species)}
               className="px-4 py-2 cursor-pointer text-zinc-200 hover:bg-zinc-700"
             >
-              <span>{species.genus} {species.species}</span>
+              {species.genus} {species.species}
             </li>
           ))}
         </ul>

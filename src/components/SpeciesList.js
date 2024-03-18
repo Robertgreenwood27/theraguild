@@ -1,20 +1,34 @@
 // components/SpeciesList.js
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { db } from '../firebase-config';
+import { collection, getDocs } from 'firebase/firestore';
 
 const SpeciesList = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [allSpecies, setAllSpecies] = useState([]);
 
-  const allSpecies = [
-    'Brachypelma hamorii',
-    'Chromatopelma cyaneopubescens',
-    'Grammostola pulchra',
-    'Lasiodora parahybana',
-    'Tliltocatl albopilosus',
-    // Add more species names as needed
-  ];
+  useEffect(() => {
+    const fetchSpecies = async () => {
+      try {
+        const speciesCollection = collection(db, 'species');
+        const speciesSnapshot = await getDocs(speciesCollection);
+        const speciesData = speciesSnapshot.docs.map((doc) => doc.data());
+        setAllSpecies(speciesData);
+      } catch (error) {
+        console.error('Error fetching species:', error);
+      }
+    };
 
-  const sortedSpecies = allSpecies.sort();
+    fetchSpecies();
+  }, []);
+
+  const sortedSpecies = allSpecies.sort((a, b) => {
+    if (a.genus === b.genus) {
+      return a.species.localeCompare(b.species);
+    }
+    return a.genus.localeCompare(b.genus);
+  });
 
   const toggleList = () => {
     setIsOpen(!isOpen);
@@ -29,15 +43,19 @@ const SpeciesList = () => {
         {isOpen ? 'Close Species List' : 'View All Species'}
       </button>
       {isOpen && (
-        <ul className="mt-4 space-y-2">
-          {sortedSpecies.map((species, index) => (
-            <li key={index}>
-              <Link href={`/species/${species.toLowerCase().replace(/ /g, '-')}`} legacyBehavior>
-                <a className="text-zinc-600 hover:text-blue-600">{species}</a>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div className="mt-4 max-h-64 overflow-y-auto">
+          <ul className="space-y-2">
+            {sortedSpecies.map((species) => (
+              <li key={species.id}>
+                <Link href={`/species/${species.slug}`} legacyBehavior>
+                  <a className="text-zinc-600 hover:text-blue-600">
+                    {species.genus} {species.species}
+                  </a>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
