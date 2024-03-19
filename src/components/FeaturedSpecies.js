@@ -20,16 +20,23 @@ const FeaturedSpecies = () => {
           console.log('No species found in the database');
           setError('No species found in the database');
         } else {
-          const speciesData = speciesSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
+          const speciesData = speciesSnapshot.docs
+            .map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }))
+            .filter((species) => species.image);
 
-          const randomIndex = Math.floor(Math.random() * speciesData.length);
-          const selectedSpecies = speciesData[randomIndex];
+          if (speciesData.length === 0) {
+            console.log('No species with valid images found');
+            setError('No species with valid images found');
+          } else {
+            const randomIndex = Math.floor(Math.random() * speciesData.length);
+            const selectedSpecies = speciesData[randomIndex];
 
-          console.log('Selected featured species:', selectedSpecies);
-          setFeaturedSpecies(selectedSpecies);
+            console.log('Selected featured species:', selectedSpecies);
+            setFeaturedSpecies(selectedSpecies);
+          }
         }
       } catch (error) {
         console.error('Error fetching featured species:', error);
@@ -65,8 +72,8 @@ const FeaturedSpecies = () => {
             <Image
               src={featuredSpecies.image}
               alt={`${featuredSpecies.genus} ${featuredSpecies.species}`}
-              width={800}
-              height={600}
+              width={400} // Adjust the width as needed
+              height={300} // Adjust the height as needed
               className="w-full h-auto rounded-lg mb-4 md:mb-0"
             />
           </div>
