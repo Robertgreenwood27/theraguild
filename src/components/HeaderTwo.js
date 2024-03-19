@@ -1,24 +1,21 @@
-import { useState, useEffect } from 'react'; // Import useState and useEffect hooks
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth'; // Import Firebase authentication methods
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 
-const HeaderTwo = () => {
-  const [user, setUser] = useState(null); // Use local state to manage user authentication status
+const HeaderTwo = ({ noBackground = false }) => {
+  const [user, setUser] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Firebase authentication initialization
   const auth = getAuth();
 
-  // Firebase authentication state change listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
-    return () => unsubscribe(); // Cleanup function to unsubscribe from the listener
+    return () => unsubscribe();
   }, [auth]);
 
-  // Function to handle logout
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -27,20 +24,19 @@ const HeaderTwo = () => {
     }
   };
 
-  // Function to toggle menu visibility
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
 
-  return (
-    <header
-  className="py-4 bg-black shadow-md relative"
-  style={{
+  // Modify here for transparent background
+  const headerStyle = noBackground ? { backgroundColor: 'transparent' } : {
     backgroundImage: `url('${process.env.NEXT_PUBLIC_BASE_URL}/cobwebsdark.png')`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
-  }}
->
+  };
+
+  return (
+    <header className={`py-4 ${noBackground ? '' : 'bg-black'} shadow-md relative`} style={headerStyle}>
       <div className="container mx-auto flex items-center justify-between relative z-10">
         <div className="logo">
           <Link href="/" passHref legacyBehavior>
@@ -56,15 +52,8 @@ const HeaderTwo = () => {
           </Link>
         </div>
         <div className="relative">
-          <button
-            className="text-zinc-100 focus:outline-none"
-            onClick={toggleMenu}
-          >
-            <svg
-              className="h-6 w-6 fill-current"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+          <button className="text-zinc-100 focus:outline-none" onClick={toggleMenu}>
+            <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               {isOpen ? (
                 <path
                   fillRule="evenodd"
@@ -83,30 +72,20 @@ const HeaderTwo = () => {
           {isOpen && (
             <div className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-md shadow-lg z-20">
               <Link href="/about" passHref legacyBehavior>
-                <a className="block px-4 py-2 text-zinc-800 hover:bg-zinc-100">
-                  About
-                </a>
+                <a className="block px-4 py-2 text-zinc-800 hover:bg-zinc-100">About</a>
               </Link>
               <Link href="/species" passHref legacyBehavior>
-                <a className="block px-4 py-2 text-zinc-800 hover:bg-zinc-100">
-                  Species
-                </a>
+                <a className="block px-4 py-2 text-zinc-800 hover:bg-zinc-100">Species</a>
               </Link>
               <Link href="/community" passHref legacyBehavior>
-                <a className="block px-4 py-2 text-zinc-800 hover:bg-zinc-100">
-                  Community
-                </a>
+                <a className="block px-4 py-2 text-zinc-800 hover:bg-zinc-100">Community</a>
               </Link>
               <Link href="/contact" passHref legacyBehavior>
-                <a className="block px-4 py-2 text-zinc-800 hover:bg-zinc-100">
-                  Contact
-                </a>
+                <a className="block px-4 py-2 text-zinc-800 hover:bg-zinc-100">Contact</a>
               </Link>
               {user ? (
                 <>
-                  <span className="block px-4 py-2 text-zinc-800">
-                    Welcome, {user.displayName || user.email}!
-                  </span>
+                  <span className="block px-4 py-2 text-zinc-800">Welcome, {user.displayName || user.email}!</span>
                   <button
                     onClick={handleLogout}
                     className="block w-full text-left px-4 py-2 text-zinc-800 hover:bg-zinc-100"
@@ -116,16 +95,14 @@ const HeaderTwo = () => {
                 </>
               ) : (
                 <Link href="/login" passHref legacyBehavior>
-                  <a className="block px-4 py-2 text-zinc-800 hover:bg-zinc-100">
-                    Login
-                  </a>
+                  <a className="block px-4 py-2 text-zinc-800 hover:bg-zinc-100">Login</a>
                 </Link>
               )}
             </div>
           )}
         </div>
       </div>
-      <div className="absolute top-0 left-0 w-full h-full bg-black opacity-30"></div>
+      {!noBackground && <div className="absolute top-0 left-0 w-full h-full bg-black opacity-30"></div>}
     </header>
   );
 };

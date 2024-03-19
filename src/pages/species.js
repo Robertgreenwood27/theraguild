@@ -1,112 +1,96 @@
-// pages/species.js
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import SpeciesList from '@/components/SpeciesList';
+import Link from 'next/link';
+import { db } from '../../firebase-config';
+import { collection, getDocs } from 'firebase/firestore';
 import HeaderTwo from '@/components/HeaderTwo';
 
 const SpeciesPage = () => {
-  const allSpecies = [
-    {
-      id: 1,
-      name: 'Brachypelma hamorii',
-      image: '/species1.jpg',
-      description: 'The Mexican Red Knee tarantula is a popular choice for beginners due to its docile nature and striking appearance.',
-    },
-    {
-      id: 2,
-      name: 'Chromatopelma cyaneopubescens',
-      image: '/species2.jpg',
-      description: 'The Green Bottle Blue tarantula is known for its vibrant colors and webbing abilities.',
-    },
-    // Add more species objects as needed
-  ];
+  const [groupedSpecies, setGroupedSpecies] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  useEffect(() => {
+    const fetchAllSpecies = async () => {
+      try {
+        console.log('Fetching all species...');
+        const speciesRef = collection(db, 'species');
+        const speciesSnapshot = await getDocs(speciesRef);
 
-  // Filter species based on search term
-  const filteredSpecies = allSpecies.filter((species) =>
-    species.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+        if (speciesSnapshot.empty) {
+          console.log('No species found in the database');
+          setError('No species found in the database');
+        } else {
+          const speciesData = speciesSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
 
-  // Calculate pagination values
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentSpecies = filteredSpecies.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredSpecies.length / itemsPerPage);
+          console.log('Fetched species:', speciesData);
 
-  // Handle search input change
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
-    setCurrentPage(1);
-  };
+          // Sort and group by genus
+          const sortedSpecies = speciesData.sort((a, b) => a.genus.localeCompare(b.genus) || a.species.localeCompare(b.species));
+          const speciesByGenus = sortedSpecies.reduce((acc, species) => {
+            acc[species.genus] = [...(acc[species.genus] || []), species];
+            return acc;
+          }, {});
 
-  // Handle page change
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
+          setGroupedSpecies(speciesByGenus);
+        }
+      } catch (error) {
+        console.error('Error fetching species:', error);
+        setError('Error fetching species');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllSpecies();
+  }, []);
+
+  console.log('SpeciesPage component rendered');
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <>
-    <HeaderTwo/>
-    <div className="species-page">
-      <section className="hero bg-zinc-900 py-16 center">
-        <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Tarantula Species</h1>
-          <p className="text-xl text-zinc-600 mb-8">
-            Explore the diverse world of tarantulas and discover fascinating species from around the globe.
-          </p>
-          <input
-            type="text"
-            placeholder="Search species..."
-            value={searchTerm}
-            onChange={handleSearch}
-            className="px-4 py-2 w-full md:w-1/2 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-600"
-          />
-        </div>
-        <SpeciesList/>
-      </section>
-
-      <section className="species-list py-16">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {currentSpecies.map((species) => (
-              <div key={species.id} className="species-card bg-black rounded-lg shadow-md overflow-hidden">
-                <Image
-                  src={species.image}
-                  alt={species.name}
-                  width={500}
-                  height={300}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold mb-4">{species.name}</h2>
-                  <p className="text-zinc-600">{species.description}</p>
-                  <a href={`/species/${species.id}`} className="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Learn More
-                  </a>
-                </div>
+    
+    <section className="species-page bg-black py-16" style={{ backgroundImage: "url('/webbing.png')", backgroundRepeat: 'repeat' }}>
+    <HeaderTwo noBackground={true} />
+      <div className="container mx-auto">
+        <h1 className="text-4xl font-bold mb-8 text-center">All Species</h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          {Object.entries(groupedSpecies).map(([genus, speciesList]) => (
+            <div key={genus} className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4">
+              <h2 className="text-2xl font-bold mb-4">{genus}</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                {speciesList.map((species) => (
+                  <Link key={species.id} href={`/species/${species.slug}`} legacyBehavior>
+                    <a className="bg-zinc-900 rounded-lg shadow-md p-6 hover:bg-zinc-800 transition duration-300">
+                      <Image
+                        src={species.image || '/noimage.png'}
+                        alt={`${species.genus} ${species.species}`}
+                        width={300}
+                        height={200}
+                        className="w-full h-auto rounded-lg mb-4"
+                      />
+                      <h3 className="text-xl font-bold">{species.species}</h3>
+                    </a>
+                  </Link>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="mt-8 flex justify-center">
-            {Array.from({ length: totalPages }, (_, index) => (
-              <button
-                key={index}
-                onClick={() => handlePageChange(index + 1)}
-                className={`mx-1 px-4 py-2 rounded-md ${
-                  currentPage === index + 1 ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'
-                }`}
-              >
-                {index + 1}
-              </button>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-      </section>
-    </div>
-    </>
+      </div>
+    </section>
+  </>
   );
 };
 
