@@ -94,27 +94,27 @@ const EditSpeciesPage = ({ species }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-  
+
     if (!user) {
       console.error('User is not authenticated');
       router.push('/login');
       return;
     }
-  
+
     try {
       const token = await user.getIdToken();
-  
+
       const speciesData = {};
-  
+
       for (const key in formData) {
         if (formData[key] !== '' && formData[key] !== undefined) {
           speciesData[key] = formData[key];
         }
       }
-  
+
       // Set the updated gallery images in speciesData
       speciesData.images = galleryImages;
-  
+
       // Check if a new primary image is selected
       if (Array.isArray(formData.image) && formData.image.length > 0) {
         const originalFileName = formData.image[0].name;
@@ -129,13 +129,13 @@ const EditSpeciesPage = ({ species }) => {
         // No new primary image selected, use the existing URL from species data or formData
         speciesData.image = species.image || formData.image;
       }
-  
+
       const currentTimestamp = new Date().toISOString();
       speciesData.editedAt = currentTimestamp; // Set the editedAt field to the current timestamp
-  
+
       console.log('Form Data:', formData);
       console.log('Species Data:', speciesData);
-  
+
       const response = await fetch(`/api/species/${species.id}`, {
         method: 'PUT',
         headers: {
@@ -144,7 +144,7 @@ const EditSpeciesPage = ({ species }) => {
         },
         body: JSON.stringify(speciesData),
       });
-  
+
       if (response.ok) {
         router.push(`/species/${species.slug}`);
       } else {
@@ -153,7 +153,7 @@ const EditSpeciesPage = ({ species }) => {
     } catch (error) {
       console.error('Error updating species:', error);
     }
-  
+
     setLoading(false);
   };
 
@@ -164,206 +164,244 @@ const EditSpeciesPage = ({ species }) => {
 
   return (
     <>
-    <HeaderTwo/>
-    <div className="container mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Edit Species</h1>
-      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-      <div>
-  <label htmlFor="altName" className="block mb-1 font-bold">
-    Alternative Name:
-  </label>
-  <input
-    type="text"
-    id="altName"
-    name="altName"
-    value={formData.altName}
-    onChange={handleChange}
-    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
-  />
-</div>
-<div>
-  <label htmlFor="maxBodyLength" className="block mb-1 font-bold">
-    Max Body Length (cm):
-  </label>
-  <input
-    type="number"
-    id="maxBodyLength"
-    name="maxBodyLength"
-    value={formData.maxBodyLength}
-    onChange={handleChange}
-    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
-    step="0.1"
-  />
-</div>
-<div>
-  <label htmlFor="maxLegSpan" className="block mb-1 font-bold">
-    Max Leg Span (cm):
-  </label>
-  <input
-    type="number"
-    id="maxLegSpan"
-    name="maxLegSpan"
-    value={formData.maxLegSpan}
-    onChange={handleChange}
-    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
-    step="0.1"
-  />
-</div>
-<div>
-  <label htmlFor="lifespan" className="block mb-1 font-bold">
-    Lifespan (years):
-  </label>
-  <input
-    type="number"
-    id="lifespan"
-    name="lifespan"
-    value={formData.lifespan}
-    onChange={handleChange}
-    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
-  />
-</div>
-<div>
-  <label htmlFor="distribution" className="block mb-1 font-bold">
-    Distribution:
-  </label>
-  <input
-    type="text"
-    id="distribution"
-    name="distribution"
-    value={formData.distribution}
-    onChange={handleChange}
-    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
-  />
-</div>
-<div>
-  <label htmlFor="habitat" className="block mb-1 font-bold">
-    Habitat:
-  </label>
-  <input
-    type="text"
-    id="habitat"
-    name="habitat"
-    value={formData.habitat}
-    onChange={handleChange}
-    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
-  />
-</div>
-<div>
-  <label htmlFor="temperament" className="block mb-1 font-bold">
-    Temperament:
-  </label>
-  <input
-    type="text"
-    id="temperament"
-    name="temperament"
-    value={formData.temperament}
-    onChange={handleChange}
-    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
-  />
-</div>
-<div>
-  <label htmlFor="urticatingSetae" className="block mb-1 font-bold">
-    Urticating Setae:
-  </label>
-  <input
-    type="text"
-    id="urticatingSetae"
-    name="urticatingSetae"
-    value={formData.urticatingSetae}
-    onChange={handleChange}
-    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
-  />
-</div>
-<div>
-  <label htmlFor="venomPotency" className="block mb-1 font-bold">
-    Venom Potency:
-  </label>
-  <input
-    type="text"
-    id="venomPotency"
-    name="venomPotency"
-    value={formData.venomPotency}
-    onChange={handleChange}
-    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
-  />
-</div>
-<div>
-  <label htmlFor="keepingDifficulty" className="block mb-1 font-bold">
-    Keeping Difficulty:
-  </label>
-  <select
-    id="keepingDifficulty"
-    name="keepingDifficulty"
-    value={formData.keepingDifficulty}
-    onChange={handleChange}
-    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
-  >
-    <option value="">Select difficulty</option>
-    <option value="Beginner">Beginner</option>
-    <option value="Intermediate">Intermediate</option>
-    <option value="Advanced">Advanced</option>
-    <option value="Expert">Expert</option>
-  </select>
-</div>
-
-        <div className="col-span-2">
-          <label htmlFor="primaryImage" className="block mb-1 font-bold">
-            Primary Image:
-          </label>
-          <input
-            type="file"
-            id="image"
-            name="image"
-            onChange={handleChange}
-            className="w-full border border-white rounded px-2 py-1 bg-black text-white"
-          />
-          {formData.image && formData.image.length > 0 && (
-            <div className="mt-2">
-              <strong>Uploaded primary image:</strong>
-              <p>{formData.image[0].name}</p>
-            </div>
-          )}
-        </div>
-
-        <div className="col-span-2">
-          <label className="block mb-1 font-bold">Gallery Images:</label>
-          <div className="grid grid-cols-4 gap-4">
-            {galleryImages.map((imageUrl, index) => (
-              <div key={index} className="relative">
-                <img src={imageUrl} alt={`Gallery Image ${index + 1}`} className="w-full h-auto" />
-                <button
-                  type="button"
-                  onClick={() => handleImageRemove(imageUrl)}
-                  className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 rounded-full"
-                >
-                  X
-                </button>
-              </div>
-            ))}
+      <HeaderTwo />
+      <div className="container mx-auto">
+        <h1 className="text-2xl font-bold mb-4">Edit Species</h1>
+        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="genus" className="block mb-1 font-bold">
+              Genus:
+            </label>
+            <input
+              type="text"
+              id="genus"
+              name="genus"
+              value={formData.genus}
+              onChange={handleChange}
+              className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+              required
+            />
           </div>
-          <label htmlFor="galleryImages" className="block mt-4 mb-1 font-bold">
-            Add Gallery Images:
-          </label>
-          <input
-            type="file"
-            id="galleryImages"
-            onChange={handleImageUpload}
-            multiple
-            className="w-full border border-white rounded px-2 py-1 bg-black text-white"
-          />
-        </div>
-
-        <div className="col-span-2">
-          <button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-            disabled={loading}
-          >
-            {loading ? 'Updating...' : 'Update Species'}
-          </button>
-        </div>
-      </form>
-    </div>
+          <div>
+            <label htmlFor="species" className="block mb-1 font-bold">
+              Species:
+            </label>
+            <input
+              type="text"
+              id="species"
+              name="species"
+              value={formData.species}
+              onChange={handleChange}
+              className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+              required
+            />
+          </div>
+          <div className="col-span-2">
+            <label htmlFor="description" className="block mb-1 font-bold">
+              Description:
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+              rows={4}
+            ></textarea>
+          </div>
+          <div>
+            <label htmlFor="altName" className="block mb-1 font-bold">
+              Alternative Name:
+            </label>
+            <input
+              type="text"
+              id="altName"
+              name="altName"
+              value={formData.altName}
+              onChange={handleChange}
+              className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+            />
+          </div>
+          <div>
+            <label htmlFor="maxBodyLength" className="block mb-1 font-bold">
+              Max Body Length (cm):
+            </label>
+            <input
+              type="number"
+              id="maxBodyLength"
+              name="maxBodyLength"
+              value={formData.maxBodyLength}
+              onChange={handleChange}
+              className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+              step="0.1"
+            />
+          </div>
+          <div>
+            <label htmlFor="maxLegSpan" className="block mb-1 font-bold">
+              Max Leg Span (cm):
+            </label>
+            <input
+              type="number"
+              id="maxLegSpan"
+              name="maxLegSpan"
+              value={formData.maxLegSpan}
+              onChange={handleChange}
+              className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+              step="0.1"
+            />
+          </div>
+          <div>
+            <label htmlFor="lifespan" className="block mb-1 font-bold">
+              Lifespan (years):
+            </label>
+            <input
+              type="number"
+              id="lifespan"
+              name="lifespan"
+              value={formData.lifespan}
+              onChange={handleChange}
+              className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+            />
+          </div>
+          <div>
+            <label htmlFor="distribution" className="block mb-1 font-bold">
+              Distribution:
+            </label>
+            <input
+              type="text"
+              id="distribution"
+              name="distribution"
+              value={formData.distribution}
+              onChange={handleChange}
+              className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+            />
+          </div>
+          <div>
+            <label htmlFor="habitat" className="block mb-1 font-bold">
+              Habitat:
+            </label>
+            <input
+              type="text"
+              id="habitat"
+              name="habitat"
+              value={formData.habitat}
+              onChange={handleChange}
+              className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+            />
+          </div>
+          <div>
+            <label htmlFor="temperament" className="block mb-1 font-bold">
+              Temperament:
+            </label>
+            <input
+              type="text"
+              id="temperament"
+              name="temperament"
+              value={formData.temperament}
+              onChange={handleChange}
+              className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+            />
+          </div>
+          <div>
+            <label htmlFor="urticatingSetae" className="block mb-1 font-bold">
+              Urticating Setae:
+            </label>
+            <input
+              type="text"
+              id="urticatingSetae"
+              name="urticatingSetae"
+              value={formData.urticatingSetae}
+              onChange={handleChange}
+              className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+            />
+          </div>
+          <div>
+            <label htmlFor="venomPotency" className="block mb-1 font-bold">
+              Venom Potency:
+            </label>
+            <input
+              type="text"
+              id="venomPotency"
+              name="venomPotency"
+              value={formData.venomPotency}
+              onChange={handleChange}
+              className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+            />
+          </div>
+          <div>
+            <label htmlFor="keepingDifficulty" className="block mb-1 font-bold">
+              Keeping Difficulty:
+            </label>
+            <select
+              id="keepingDifficulty"
+              name="keepingDifficulty"
+              value={formData.keepingDifficulty}
+              onChange={handleChange}
+              className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+            >
+              <option value="">Select difficulty</option>
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+              <option value="Expert">Expert</option>
+            </select>
+          </div>
+          <div className="col-span-2">
+            <label htmlFor="primaryImage" className="block mb-1 font-bold">
+              Primary Image:
+            </label>
+            <input
+              type="file"
+              id="image"
+              name="image"
+              onChange={handleChange}
+              className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+            />
+            {formData.image && formData.image.length > 0 && (
+              <div className="mt-2">
+                <strong>Uploaded primary image:</strong>
+                <p>{formData.image[0].name}</p>
+              </div>
+            )}
+          </div>
+          <div className="col-span-2">
+            <label className="block mb-1 font-bold">Gallery Images:</label>
+            <div className="grid grid-cols-4 gap-4">
+              {galleryImages.map((imageUrl, index) => (
+                <div key={index} className="relative">
+                  <img src={imageUrl} alt={`Gallery Image ${index + 1}`} className="w-full h-auto" />
+                  <button
+                    type="button"
+                    onClick={() => handleImageRemove(imageUrl)}
+                    className="absolute top-0 right-0 bg-red-500 text-white px-2 py-1 rounded-full"
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
+            </div>
+            <label htmlFor="galleryImages" className="block mt-4 mb-1 font-bold">
+              Add Gallery Images:
+            </label>
+            <input
+              type="file"
+              id="galleryImages"
+              onChange={handleImageUpload}
+              multiple
+              className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+            />
+          </div>
+          <div className="col-span-2">
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+              disabled={loading}
+            >
+              {loading ? 'Updating...' : 'Update Species'}
+            </button>
+          </div>
+        </form>
+      </div>
     </>
   );
 };
