@@ -28,7 +28,6 @@ const HeaderTwo = ({ noBackground = false }) => {
     setIsOpen(!isOpen);
   };
 
-  // Modify here for transparent background
   const headerStyle = noBackground ? { backgroundColor: 'transparent' } : {
     backgroundImage: `url('${process.env.NEXT_PUBLIC_BASE_URL}/cobwebsdark.png')`,
     backgroundSize: 'cover',
@@ -71,14 +70,19 @@ const HeaderTwo = ({ noBackground = false }) => {
           </button>
           {isOpen && (
             <div className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-md shadow-lg z-20">
-              <Link href="/about" passHref legacyBehavior>
-                <a className="block px-4 py-2 text-zinc-800 hover:bg-zinc-100">About</a>
-              </Link>
               <Link href="/species" passHref legacyBehavior>
                 <a className="block px-4 py-2 text-zinc-800 hover:bg-zinc-100">Species</a>
               </Link>
+              {user && (
+                <Link href="/addSpecies" passHref legacyBehavior>
+                  <a className="block px-4 py-2 text-zinc-800 hover:bg-zinc-100">Add New Species</a>
+                </Link>
+              )}
               <Link href="/community" passHref legacyBehavior>
                 <a className="block px-4 py-2 text-zinc-800 hover:bg-zinc-100">Community</a>
+              </Link>
+              <Link href="/about" passHref legacyBehavior>
+                <a className="block px-4 py-2 text-zinc-800 hover:bg-zinc-100">About</a>
               </Link>
               <Link href="/contact" passHref legacyBehavior>
                 <a className="block px-4 py-2 text-zinc-800 hover:bg-zinc-100">Contact</a>

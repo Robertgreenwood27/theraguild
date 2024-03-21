@@ -1,20 +1,17 @@
-import { useState } from 'react'; // Import useState hook
-import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth'; // Import Firebase authentication methods
+import { useState } from 'react';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import Image from 'next/image';
 import Link from 'next/link';
 
 const Header = () => {
-  const [user, setUser] = useState(null); // Use local state to manage user authentication status
+  const [user, setUser] = useState(null);
 
-  // Firebase authentication initialization
   const auth = getAuth();
 
-  // Firebase authentication state change listener
   onAuthStateChanged(auth, (currentUser) => {
     setUser(currentUser);
   });
 
-  // Function to handle logout
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -48,11 +45,13 @@ const Header = () => {
         </div>
         <nav>
           <ul className="flex space-x-6 text-lg">
-            <li>
-              <Link href="/about" passHref legacyBehavior>
-                <a className="text-zinc-100 hover:text-zinc-300">About</a>
-              </Link>
-            </li>
+            {user && (
+              <li>
+                <Link href="/addSpecies" passHref legacyBehavior>
+                  <a className="text-zinc-100 hover:text-zinc-300">Add New Species</a>
+                </Link>
+              </li>
+            )}
             <li>
               <Link href="/species" passHref legacyBehavior>
                 <a className="text-zinc-100 hover:text-zinc-300">Species</a>
@@ -61,6 +60,11 @@ const Header = () => {
             <li>
               <Link href="/community" passHref legacyBehavior>
                 <a className="text-zinc-100 hover:text-zinc-300">Community</a>
+              </Link>
+            </li>
+            <li>
+              <Link href="/about" passHref legacyBehavior>
+                <a className="text-zinc-100 hover:text-zinc-300">About</a>
               </Link>
             </li>
             <li>
