@@ -27,7 +27,7 @@ export default function LandingPage() {
       <Header />
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold mb-4">Welcome to ArachneGuild</h1>
-        <p className="text-xl mb-8">Discover the world&apos;s largest tarantula database.</p>
+        <p className="text-xl mb-8">Discover the world&apos;s (soon to be) largest tarantula database.</p>
         <SearchBar />
         <section className="my-12">
           <h2 className="text-3xl font-bold mb-4">Featured Species</h2>
