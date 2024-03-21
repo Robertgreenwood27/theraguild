@@ -72,8 +72,8 @@ const FeaturedSpecies = () => {
             <Image
               src={featuredSpecies.image}
               alt={`${featuredSpecies.genus} ${featuredSpecies.species}`}
-              width={400} // Adjust the width as needed
-              height={300} // Adjust the height as needed
+              width={200} // Adjust the width as needed
+              height={200} // Adjust the height as needed
               className="w-full h-auto rounded-lg mb-4 md:mb-0"
             />
           </div>
