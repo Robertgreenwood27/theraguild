@@ -79,8 +79,8 @@ const SpeciesDetail = ({ species }) => {
                     <Image
                       src={species.image} // Make sure species.image is a valid https URL
                       alt={`${species.genus} ${species.species}`}
-                      width={300}
-                      height={300}
+                      width={200}
+                      height={200}
                       className="w-full h-auto rounded-lg shadow-md"
                     />
                   ) : (

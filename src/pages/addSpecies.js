@@ -370,11 +370,7 @@ const AddSpeciesPage = () => {
     ))}
   </ul>
 </div>
-
-
-
 </div>
-
         <div className="col-span-2">
           <button
             type="submit"
