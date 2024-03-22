@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { storage } from '../../firebase-config';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useAuth } from '../components/AuthProvider';
+import HeaderTwo from '@/components/HeaderTwo';
 
 const AddSpeciesPage = () => {
   const { user } = useAuth();
@@ -142,6 +143,8 @@ const AddSpeciesPage = () => {
   };
 
   return (
+    <>
+    <HeaderTwo/>
     <div className="container mx-auto">
       <h1 className="text-2xl font-bold mb-4">Add New Species</h1>
       <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
@@ -383,6 +386,7 @@ const AddSpeciesPage = () => {
         </div>
       </form>
     </div>
+    </>
   );
 };
 
