@@ -77,12 +77,13 @@ const SpeciesDetail = ({ species }) => {
                 <div className="mb-8">
                   {species.image ? (
                     <Image
-                      src={species.image} // Make sure species.image is a valid https URL
-                      alt={`${species.genus} ${species.species}`}
-                      width={200}
-                      height={200}
-                      className="w-full h-auto rounded-lg shadow-md"
-                    />
+                    src={species.image}
+                    alt={`${species.genus} ${species.species}`}
+                    width={500} // Adjusted from 1000
+                    height={500} // Adjusted from 1000
+                    className="w-2/3 h-auto rounded-lg shadow-md"
+                  />
+                  
                   ) : (
                     <MissingData>No image available</MissingData>
                   )}
