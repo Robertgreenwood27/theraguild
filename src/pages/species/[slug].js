@@ -12,6 +12,8 @@ const MissingData = ({ children }) => (
   </div>
 );
 
+
+
 export async function getServerSideProps(context) {
   const { slug } = context.params;
 
@@ -48,6 +50,21 @@ export async function getServerSideProps(context) {
   };
 }
 
+const InfoSection = ({ title, content, missingText }) => (
+  <div className="mb-8">
+    <h2 className="text-2xl font-bold mb-2 text-red-500">{title}</h2>
+    {content ? (
+      typeof content === 'string' ? (
+        <div className="text-zinc-300">{content}</div>
+      ) : (
+        content
+      )
+    ) : (
+      <MissingData>{missingText}</MissingData>
+    )}
+  </div>
+);
+
 const SpeciesDetail = ({ species }) => {
   const router = useRouter();
 
@@ -58,15 +75,35 @@ const SpeciesDetail = ({ species }) => {
   return (
     <>
       <HeaderTwo />
-      <div className="species-detail">
-        <section className="hero bg-zinc-900 py-16">
+      <div className="species-detail bg-gradient-to-b from-zinc-900 to-black min-h-screen">
+        <section className="hero py-16">
           <div className="container mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              {species.genus} {species.species}
-            </h1>
-            {species.altName && (
-              <p className="text-xl text-zinc-400">{species.altName}</p>
-            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div>
+                <h1 className="text-5xl md:text-6xl font-bold mb-4 text-white">
+                  {species.genus} {species.species}
+                </h1>
+                {species.altName && (
+                  <p className="text-xl text-red-500">{species.altName}</p>
+                )}
+              </div>
+              <div>
+                {species.image ? (
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-black rounded-lg transform rotate-3"></div>
+                    <Image
+                      src={species.image}
+                      alt={`${species.genus} ${species.species}`}
+                      width={500}
+                      height={500}
+                      className="relative rounded-lg shadow-md border-4 border-zinc-800 p-2"
+                    />
+                  </div>
+                ) : (
+                  <MissingData>No image available</MissingData>
+                )}
+              </div>
+            </div>
           </div>
         </section>
 
@@ -74,117 +111,87 @@ const SpeciesDetail = ({ species }) => {
           <div className="container mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="md:col-span-2">
-                <div className="mb-8">
-                  {species.image ? (
-                    <Image
-                    src={species.image}
-                    alt={`${species.genus} ${species.species}`}
-                    width={500} // Adjusted from 1000
-                    height={500} // Adjusted from 1000
-                    className="w-2/3 h-auto rounded-lg shadow-md"
-                  />
-                  
-                  ) : (
-                    <MissingData>No image available</MissingData>
-                  )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div>
+                    <InfoSection
+                      title="Description"
+                      content={species.description}
+                      missingText="No description available"                    />
+                    <InfoSection
+                      title="Distribution"
+                      content={species.distribution}
+                      missingText="No distribution information available"
+                    />
+                    <InfoSection
+                      title="Habitat"
+                      content={species.habitat}
+                      missingText="No habitat information available"
+                    />
+                    <InfoSection
+                      title="Size"                      content={
+                        <>
+                          {species.maxBodyLength && (
+                            <p className="text-zinc-300">
+                              Max Body Length: {species.maxBodyLength} cm
+                            </p>
+                          )}
+                          {species.maxLegSpan && (
+                            <p className="text-zinc-300">
+                              Max Leg Span: {species.maxLegSpan} cm
+                            </p>
+                          )}
+                        </>
+                      }
+                      missingText="No size information available"
+                    />
+                  </div>
+                  <div>
+                    <InfoSection
+                      title="Lifespan"
+                      content={
+                        species.lifespan && (
+                          <p className="text-zinc-300">
+                            Average Lifespan: {species.lifespan} years
+                          </p>
+                        )
+                      }
+                      missingText="No lifespan information available"
+                    />
+                    <InfoSection
+                      title="Temperament"
+                      content={species.temperament}
+                      missingText="No temperament information available"
+                    />
+                    <InfoSection
+                      title="Urticating Setae"
+                      content={species.urticatingSetae}
+                      missingText="No information available about urticating setae"
+                    />
+                    <InfoSection
+                      title="Venom Potency"
+                      content={species.venomPotency}
+                      missingText="No information available about venom potency"
+                    />
+                    <InfoSection
+                      title="Keeping Difficulty"
+                      content={species.keepingDifficulty}
+                      missingText="No information available about keeping difficulty"
+                    />
+                  </div>
                 </div>
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold mb-4">Description</h2>
-                  {species.description ? (
-                    <p className="text-zinc-600">{species.description}</p>
-                  ) : (
-                    <MissingData>No description available</MissingData>
-                  )}
-                </div>
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold mb-4">Distribution</h2>
-                  {species.distribution ? (
-                    <p className="text-zinc-600">{species.distribution}</p>
-                  ) : (
-                    <MissingData>No distribution information available</MissingData>
-                  )}
-                </div>
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold mb-4">Habitat</h2>
-                  {species.habitat ? (
-                    <p className="text-zinc-600">{species.habitat}</p>
-                  ) : (
-                    <MissingData>No habitat information available</MissingData>
-                  )}
-                </div>
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold mb-4">Size</h2>
-                  {species.maxBodyLength || species.maxLegSpan ? (
-                    <div>
-                      {species.maxBodyLength && (
-                        <p className="text-zinc-600">
-                          Max Body Length: {species.maxBodyLength} cm
-                        </p>
-                      )}
-                      {species.maxLegSpan && (
-                        <p className="text-zinc-600">
-                          Max Leg Span: {species.maxLegSpan} cm
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <MissingData>No size information available</MissingData>
-                  )}
-                </div>
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold mb-4">Lifespan</h2>
-                  {species.lifespan ? (
-                    <p className="text-zinc-600">
-                      Average Lifespan: {species.lifespan} years
-                    </p>
-                  ) : (
-                    <MissingData>No lifespan information available</MissingData>
-                  )}
-                </div>
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold mb-4">Temperament</h2>
-                  {species.temperament ? (
-                    <p className="text-zinc-600">{species.temperament}</p>
-                  ) : (
-                    <MissingData>No temperament information available</MissingData>
-                  )}
-                </div>
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold mb-4">Urticating Setae</h2>
-                  {species.urticatingSetae ? (
-                    <p className="text-zinc-600">{species.urticatingSetae}</p>
-                  ) : (
-                    <MissingData>No information available about urticating setae</MissingData>
-                  )}
-                </div>
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold mb-4">Venom Potency</h2>
-                  {species.venomPotency ? (
-                    <p className="text-zinc-600">{species.venomPotency}</p>
-                  ) : (
-                    <MissingData>No information available about venom potency</MissingData>
-                  )}
-                </div>
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold mb-4">Keeping Difficulty</h2>
-                  {species.keepingDifficulty ? (
-                    <p className="text-zinc-600">{species.keepingDifficulty}</p>
-                  ) : (
-                    <MissingData>No information available about keeping difficulty</MissingData>
-                  )}
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold mb-4">Image Gallery</h2>
+                <div className="mt-16">
+                  <h2 className="text-3xl font-bold mb-4 text-white">Image Gallery</h2>
                   {species.images && species.images.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       {species.images.map((imageUrl, index) => (
-                        <div key={index}>
+                        <div key={index} className="relative">
+                          <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-black rounded-lg transform -rotate-3"></div>
                           <Image
                             src={imageUrl}
                             alt={`${species.genus} ${species.species} Gallery Image ${index + 1}`}
                             width={500}
                             height={500}
-                            className="w-full h-auto rounded-lg shadow-md"
+                            className="relative rounded-lg shadow-md"
                           />
                         </div>
                       ))}
@@ -195,17 +202,18 @@ const SpeciesDetail = ({ species }) => {
                 </div>
               </div>
               <div>
-                <h2 className="text-2xl font-bold mb-4">Chat</h2>
-                {/* Render chat component here */}
-                <Chat />
-              </div>
-              <div className="mt-8">
+                <div className="bg-gradient-to-r from-red-600 to-black p-4 rounded-lg shadow-md">
+                  <h2 className="text-2xl font-bold mb-4 text-white">Chat</h2>
+                  <Chat />
+                </div>
+                <div className="mt-8">
                   <Link href={`/species/edit/${species.slug}`}>
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded">
+                    <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
                       Edit Species
                     </button>
                   </Link>
                 </div>
+              </div>
             </div>
           </div>
         </section>

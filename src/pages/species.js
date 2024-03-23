@@ -5,6 +5,7 @@ import { db } from '../../firebase-config';
 import { collection, getDocs } from 'firebase/firestore';
 import HeaderTwo from '@/components/HeaderTwo';
 
+
 const SpeciesPage = () => {
   const [groupedSpecies, setGroupedSpecies] = useState({});
   const [loading, setLoading] = useState(true);
@@ -72,52 +73,73 @@ const filterSpecies = (speciesList) => {
 };
 
 
-  return (
-    <>
-      <section className="species-page bg-black py-16" style={{ backgroundImage: "url('/webbing.png')", backgroundRepeat: 'repeat' }}>
+return (
+  <>
+    <section
+      className="species-page bg-gradient-to-b from-zinc-900 to-black py-16"
+      style={{
+        backgroundImage: "url('/webbing.png')",
+        backgroundRepeat: 'repeat',
+        backgroundBlendMode: 'overlay',
+      }}
+    >
       <HeaderTwo noBackground={true} />
-        <div className="container mx-auto">
-          <h1 className="text-4xl font-bold mb-8 text-center">All Species</h1>
-          {/* Add search input */}
+      <div className="container mx-auto">
+        <h1 className="text-5xl font-bold mb-8 text-center text-white">
+          Explore the Incredible Diversity of Tarantulas
+        </h1>
+        <div className="relative mb-8">
           <input
-  type="text"
-  className="w-full p-4 bg-white bg-opacity-20 text-white placeholder-gray-300 border-0 rounded-md focus:ring-2 focus:ring-opacity-50 focus:ring-white focus:outline-none"
-  placeholder="Search for a genus or species"
-  value={filter}
-  onChange={handleFilterChange}
-/>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-8">
-            {Object.entries(groupedSpecies).map(([genus, speciesList]) => {
-              const filteredSpecies = filterSpecies(speciesList);
-              return filteredSpecies.length > 0 ? (
-                <div key={genus} className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4">
-                  <h2 className="text-2xl font-bold mb-4">{genus}</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                    {filteredSpecies.map((species) => (
-                      <Link key={species.id} href={`/species/${species.slug}`} legacyBehavior>
-                        <a className="bg-zinc-900 rounded-lg shadow-md p-6 hover:bg-zinc-800 transition duration-300">
-                          <Image
-                            src={species.image || '/noimage.png'}
-                            alt={`${species.genus} ${species.species}`}
-                            width={300}
-                            height={200}
-                            className="w-full h-auto rounded-lg mb-4"
-                          />
-                                                    <h3 className="text-xl font-bold">{species.genus} {species.species}</h3>
-                        </a>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ) : null;
-            })}
-          </div>
+            type="text"
+            className="w-full p-4 bg-white bg-opacity-20 text-white placeholder-gray-300 border-0 rounded-md focus:outline-none"
+            placeholder="Search for a genus or species"
+            value={filter}
+            onChange={handleFilterChange}
+          />
+          <div className="absolute inset-0 rounded-md border-2 border-transparent pointer-events-none animate-chase"></div>
         </div>
-      </section>
-    </>
-  );
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          {Object.entries(groupedSpecies).map(([genus, speciesList]) => {
+            const filteredSpecies = filterSpecies(speciesList);
+            return filteredSpecies.length > 0 ? (
+              <div
+                key={genus}
+                className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4"
+              >
+                <h2 className="text-3xl font-bold mb-4 text-red-500">{genus}</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                  {filteredSpecies.map((species) => (
+                    <Link key={species.id} href={`/species/${species.slug}`} legacyBehavior>
+                      <a className="bg-zinc-800 rounded-lg shadow-md p-6 hover:bg-zinc-700 transition duration-300 relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-black opacity-70 transition duration-300 group-hover:opacity-80"></div>
+                        <div className="relative z-10">
+                          <div className="relative overflow-hidden rounded-lg mb-4">
+                            <Image
+                              src={species.image || '/noimage.png'}
+                              alt={`${species.genus} ${species.species}`}
+                              width={300}
+                              height={200}
+                              className="w-full h-auto rounded-lg shadow-lg transition duration-300 group-hover:scale-110"
+                            />
+                            <div className="absolute inset-0 rounded-lg border-2 border-transparent group-hover:border-red-500 transition duration-300 pointer-events-none animate-chase"></div>
+                          </div>
+                          <h3 className="text-xl font-bold text-white">
+                            {species.genus} {species.species}
+                          </h3>
+                        </div>
+                      </a>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : null;
+          })}
+        </div>
+      </div>
+    </section>
+  </>
+);
 };
 
 export default SpeciesPage;
-

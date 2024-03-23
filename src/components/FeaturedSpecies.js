@@ -64,26 +64,31 @@ const FeaturedSpecies = () => {
   }
 
   return (
-    <section className="featured-species bg-black py-16">
+    <section className="featured-species bg-zinc-900 py-16">
       <div className="container mx-auto">
-        <h2 className="text-3xl font-bold mb-8 text-center">Featured Species</h2>
-        <div className="bg-zinc-900 rounded-lg shadow-md p-6 md:flex md:items-center md:justify-between">
-          <div className="md:w-1/2">
+        <h2 className="text-4xl font-bold mb-8 text-center text-red-500 font-rock-salt">
+          Featured Species
+        </h2>
+        <div className="bg-zinc-800 rounded-lg shadow-md p-6 md:flex md:items-center md:justify-between relative overflow-hidden">
+          <div className="absolute inset-0">
+            <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-black opacity-70"></div>
+          </div>
+          <div className="md:w-1/2 relative z-10">
             <Image
               src={featuredSpecies.image}
               alt={`${featuredSpecies.genus} ${featuredSpecies.species}`}
-              width={200} // Adjust the width as needed
-              height={200} // Adjust the height as needed
-              className="w-full h-auto rounded-lg mb-4 md:mb-0"
+              width={400}
+              height={400}
+              className="w-full h-auto rounded-lg mb-4 md:mb-0 shadow-lg transform -rotate-3"
             />
           </div>
-          <div className="md:w-1/2 md:pl-8">
-            <h3 className="text-2xl font-bold mb-2">
+          <div className="md:w-1/2 md:pl-8 relative z-10">
+            <h3 className="text-3xl font-bold mb-2 text-white">
               {featuredSpecies.genus} {featuredSpecies.species}
             </h3>
-            <p className="text-gray-400 mb-4">{featuredSpecies.description}</p>
+            <p className="text-zinc-300 mb-4">{featuredSpecies.description}</p>
             <Link href={`/species/${featuredSpecies.slug}`} legacyBehavior>
-              <a className="inline-block bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition duration-300">
+              <a className="inline-block bg-red-600 text-white px-6 py-3 rounded-md hover:bg-red-700 transition duration-300 font-bold uppercase tracking-wider">
                 Learn More
               </a>
             </Link>

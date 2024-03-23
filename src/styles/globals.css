@@ -63,3 +63,17 @@ body {
   background-repeat: repeat; /* This ensures the image tiles */
   background-size: auto; /* Or you can set a specific size */
 }
+
+
+@keyframes chase {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-chase {
+  animation: chase 4s linear infinite;
+}
