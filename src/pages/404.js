@@ -21,7 +21,7 @@ const NotFoundPage = () => {
             Oops! Looks like our web developer got a little tangled up in this one.
           </p>
           <p className="text-xl text-white mb-8">
-            Don't worry, we'll help untangle this sticky situation and get you back on track!
+            Don&apos;t worry, we&apos;ll help untangle this sticky situation and get you back on track!
           </p>
           <Link href="/" legacyBehavior>
             <a className="px-6 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600">
