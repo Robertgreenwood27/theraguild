@@ -20,7 +20,7 @@ export async function getServerSideProps(context) {
   // Initialize Firebase Admin and Firestore
   let db;
   try {
-    const firebaseAdmin = await initAdmin(); // Ensure this is awaited and matches your exported function
+    const firebaseAdmin = await initAdmin();
     db = firebaseAdmin.firestore();
   } catch (error) {
     console.error('Firebase admin initialization error:', error);
@@ -28,6 +28,8 @@ export async function getServerSideProps(context) {
   }
 
   let speciesData = null;
+  let allSpecies = [];
+
   try {
     const speciesRef = db.collection('species').where('slug', '==', slug);
     const snapshot = await speciesRef.get();
@@ -38,6 +40,10 @@ export async function getServerSideProps(context) {
     snapshot.forEach(doc => {
       speciesData = { id: doc.id, ...doc.data() };
     });
+
+    // Fetch all species
+    const allSpeciesSnapshot = await db.collection('species').get();
+    allSpecies = allSpeciesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
     console.error('Error getting documents:', error);
     return { notFound: true };
@@ -46,6 +52,7 @@ export async function getServerSideProps(context) {
   return {
     props: {
       species: speciesData,
+      allSpecies: allSpecies,
     },
   };
 }
@@ -65,8 +72,21 @@ const InfoSection = ({ title, content, missingText }) => (
   </div>
 );
 
-const SpeciesDetail = ({ species }) => {
+const SpeciesDetail = ({ species, allSpecies }) => {
   const router = useRouter();
+
+  const sortedSpecies = allSpecies.sort((a, b) => {
+    if (a.genus === b.genus) {
+      return a.species.localeCompare(b.species);
+    }
+    return a.genus.localeCompare(b.genus);
+  });
+
+  const currentIndex = sortedSpecies.findIndex(
+    (s) => s.slug === species.slug
+  );
+  const prevSpecies = sortedSpecies[currentIndex - 1];
+  const nextSpecies = sortedSpecies[currentIndex + 1];
 
   if (router.isFallback) {
     return <div>Loading...</div>;
@@ -78,6 +98,22 @@ const SpeciesDetail = ({ species }) => {
       <div className="species-detail bg-gradient-to-b from-zinc-900 to-black min-h-screen">
         <section className="hero py-16">
           <div className="container mx-auto">
+          <div className="flex justify-between items-center mb-8">
+      {prevSpecies && (
+        <Link href={`/species/${prevSpecies.slug}`} legacyBehavior>
+          <a className="text-red-500 hover:text-red-700">
+            &#8592; Prev: {prevSpecies.genus} {prevSpecies.species}
+          </a>
+        </Link>
+      )}
+      {nextSpecies && (
+        <Link href={`/species/${nextSpecies.slug}`} legacyBehavior>
+          <a className="text-red-500 hover:text-red-700">
+            Next: {nextSpecies.genus} {nextSpecies.species} &#8594;
+          </a>
+        </Link>
+      )}
+    </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               <div>
                 <h1 className="text-5xl md:text-6xl font-bold mb-4 text-white">
@@ -87,6 +123,25 @@ const SpeciesDetail = ({ species }) => {
                   <p className="text-xl text-red-500">{species.altName}</p>
                 )}
               </div>
+              <section className="mb-8">
+    <h2 className="text-2xl font-bold mb-2 text-red-500">How to Say It</h2>
+    {species.genusHowToSay || species.speciesHowToSay ? (
+      <div className="text-zinc-300">
+        {species.genusHowToSay && (
+          <p>
+            {species.genusHowToSay}
+          </p>
+        )}
+        {species.speciesHowToSay && (
+          <p>
+            {species.speciesHowToSay}
+          </p>
+        )}
+      </div>
+    ) : (
+      <MissingData>No pronunciation information available</MissingData>
+    )}
+  </section>
               <div>
                 {species.image ? (
                   <div className="relative">

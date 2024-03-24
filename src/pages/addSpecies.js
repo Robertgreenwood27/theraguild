@@ -24,6 +24,8 @@ const AddSpeciesPage = () => {
   const [formData, setFormData] = useState({
     genus: '',
     species: '',
+    genusHowToSay: '',
+    speciesHowToSay: '',
     description: '',
     altName: '',
     maxBodyLength: '',
@@ -116,7 +118,9 @@ const AddSpeciesPage = () => {
         slug,
         images: galleryImageUrls,
         image: primaryImageUrl,
-        createdAt: currentTimestamp, // Set the createdAt field to the current timestamp
+        createdAt: currentTimestamp,
+        genusHowToSay: formData.genusHowToSay,
+        speciesHowToSay: formData.speciesHowToSay,
       };
   
       const response = await fetch('/api/species', {
@@ -176,6 +180,35 @@ const AddSpeciesPage = () => {
       required
     />
   </div>
+  <div className="col-span-2">
+  <h2 className="text-xl font-bold mb-2">How to Say It</h2>
+</div>
+<div>
+  <label htmlFor="genusHowToSay" className="block mb-1 font-bold">
+    Genus Pronunciation:
+  </label>
+  <input
+    type="text"
+    id="genusHowToSay"
+    name="genusHowToSay"
+    value={formData.genusHowToSay}
+    onChange={handleChange}
+    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+  />
+</div>
+<div>
+  <label htmlFor="speciesHowToSay" className="block mb-1 font-bold">
+    Species Pronunciation:
+  </label>
+  <input
+    type="text"
+    id="speciesHowToSay"
+    name="speciesHowToSay"
+    value={formData.speciesHowToSay}
+    onChange={handleChange}
+    className="w-full border border-white rounded px-2 py-1 bg-black text-white"
+  />
+</div>
   <div className="col-span-2">
     <label htmlFor="description" className="block mb-1 font-bold">
       Description:
