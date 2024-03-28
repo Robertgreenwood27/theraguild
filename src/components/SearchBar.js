@@ -1,35 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { db } from '../../firebase-config';
-import { collection, getDocs } from 'firebase/firestore';
 
-const SearchBar = () => {
+const SearchBar = ({ species }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [species, setSpecies] = useState([]);
-  const [filteredSpecies, setFilteredSpecies] = useState([]);
+  const [filteredSpecies, setFilteredSpecies] = useState(species || []);
   const [showDropdown, setShowDropdown] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    const fetchSpecies = async () => {
-      try {
-        const speciesRef = collection(db, 'species');
-        const speciesSnapshot = await getDocs(speciesRef);
-        const speciesData = speciesSnapshot.docs.map((doc) => doc.data());
-        const sortedSpeciesData = speciesData.sort((a, b) => {
-          if (a.genus === b.genus) {
-            return a.species.localeCompare(b.species); // Sort by species if genera are the same
-          }
-          return a.genus.localeCompare(b.genus); // Sort by genus
-        });
-        setSpecies(sortedSpeciesData);
-      } catch (error) {
-        console.error('Error fetching species:', error);
-      }
-    };
-
-    fetchSpecies();
-  }, []);
 
   useEffect(() => {
     const filtered = species.filter((s) =>
@@ -90,7 +66,7 @@ const SearchBar = () => {
           </svg>
         </button>
       </form>
-      {showDropdown && (
+      {showDropdown && filteredSpecies.length > 0 && (
         <ul className="absolute z-10 w-full mt-1 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg overflow-auto max-h-60">
           {filteredSpecies.map((species) => (
             <li

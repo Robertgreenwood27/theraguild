@@ -5,6 +5,7 @@ import Chat from '@/components/Chat';
 import HeaderTwo from '@/components/HeaderTwo';
 import { initAdmin } from '../../../firebaseAdmin';
 import Link from 'next/link';
+import { getCache } from '../../cacheService'; // Added cacheService import
 
 const MissingData = ({ children }) => (
   <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-md">
@@ -12,12 +13,23 @@ const MissingData = ({ children }) => (
   </div>
 );
 
-
-
 export async function getServerSideProps(context) {
   const { slug } = context.params;
+  const cache = getCache(); // Use cache service
 
-  // Initialize Firebase Admin and Firestore
+  // Try to get the species data from the cache
+  const cachedSpeciesData = await cache.get(`species:${slug}`);
+  if (cachedSpeciesData) {
+    const speciesData = JSON.parse(cachedSpeciesData);
+    return {
+      props: {
+        species: speciesData,
+        allSpecies: [], // We'll fetch this separately
+      },
+    };
+  }
+
+  // If not found in the cache, continue to fetch from the database
   let db;
   try {
     const firebaseAdmin = await initAdmin();
@@ -41,9 +53,18 @@ export async function getServerSideProps(context) {
       speciesData = { id: doc.id, ...doc.data() };
     });
 
-    // Fetch all species
-    const allSpeciesSnapshot = await db.collection('species').get();
-    allSpecies = allSpeciesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Fetch all species from the cache or database
+    const cachedAllSpecies = await cache.get('allSpecies');
+    if (cachedAllSpecies) {
+      allSpecies = JSON.parse(cachedAllSpecies);
+    } else {
+      const allSpeciesSnapshot = await db.collection('species').get();
+      allSpecies = allSpeciesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      await cache.set('allSpecies', JSON.stringify(allSpecies), 'EX', 3600); // Cache for 1 hour
+    }
+
+    // Store the fetched species data in the cache
+    await cache.set(`species:${slug}`, JSON.stringify(speciesData), 'EX', 3600); // Cache for 1 hour
   } catch (error) {
     console.error('Error getting documents:', error);
     return { notFound: true };

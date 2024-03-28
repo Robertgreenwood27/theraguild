@@ -1,36 +1,37 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { initAdmin } from '../../../../firebaseAdmin';
-import { storage } from '../../../../firebase-config';
+import { storage, db } from '../../../../firebase-config';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useAuth } from '../../../components/AuthProvider';
 import HeaderTwo from '@/components/HeaderTwo';
 
 export async function getServerSideProps(context) {
   const { slug } = context.params;
 
-  // Initialize Firebase Admin and Firestore
-  const firebaseAdmin = await initAdmin();
-  const db = firebaseAdmin.firestore();
+  try {
+    const speciesQuery = query(collection(db, 'species'), where('slug', '==', slug));
+    const speciesSnapshot = await getDocs(speciesQuery);
 
-  // Fetch the species data based on the slug
-  const speciesRef = db.collection('species').where('slug', '==', slug);
-  const snapshot = await speciesRef.get();
+    if (speciesSnapshot.empty) {
+      return { notFound: true };
+    }
 
-  if (snapshot.empty) {
+    const speciesData = speciesSnapshot.docs[0].data();
+    const speciesId = speciesSnapshot.docs[0].id;
+
+    return {
+      props: {
+        species: {
+          id: speciesId,
+          ...speciesData,
+        },
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching species data:', error);
     return { notFound: true };
   }
-
-  let speciesData = null;
-  snapshot.forEach(doc => {
-    speciesData = { id: doc.id, ...doc.data() };
-  });
-
-  return {
-    props: {
-      species: speciesData,
-    },
-  };
 }
 
 const EditSpeciesPage = ({ species }) => {
@@ -102,8 +103,6 @@ const EditSpeciesPage = ({ species }) => {
     }
 
     try {
-      const token = await user.getIdToken();
-
       const speciesData = {};
 
       for (const key in formData) {
@@ -136,20 +135,20 @@ const EditSpeciesPage = ({ species }) => {
       console.log('Form Data:', formData);
       console.log('Species Data:', speciesData);
 
-      const response = await fetch(`/api/species/${species.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(speciesData),
-      });
+      const speciesRef = doc(db, 'species', species.id);
+      await updateDoc(speciesRef, speciesData);
 
-      if (response.ok) {
-        router.push(`/species/${species.slug}`);
-      } else {
-        console.error('Error updating species:', response.status);
-      }
+      // Update the cache after successfully updating the species in the database
+      const cache = getCache();
+
+      // Invalidate the existing species cache for the edited species
+      await cache.del(`species:${species.slug}`);
+
+      // Invalidate the existing allSpecies cache
+      await cache.del('allSpecies');
+
+      // Redirect to the species detail page
+      router.push(`/species/${species.slug}`);
     } catch (error) {
       console.error('Error updating species:', error);
     }
@@ -168,7 +167,7 @@ const EditSpeciesPage = ({ species }) => {
       <div className="container mx-auto">
         <h1 className="text-2xl font-bold mb-4">Edit Species</h1>
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-          <div>
+        <div>
             <label htmlFor="genus" className="block mb-1 font-bold">
               Genus:
             </label>

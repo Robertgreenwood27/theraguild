@@ -133,6 +133,15 @@ const AddSpeciesPage = () => {
       });
   
       if (response.ok) {
+        const cache = getCache();
+        await cache.del('allSpecies');
+
+        const app = await initAdmin();
+        const db = app.firestore();
+        const allSpeciesSnapshot = await db.collection('species').get();
+        const allSpecies = allSpeciesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        await cache.set('allSpecies', JSON.stringify(allSpecies), 'EX', 3600); // Cache for 1 hour
         router.push(`/species/${slug}`);
       } else {
         console.error('Error adding species:', response.status);

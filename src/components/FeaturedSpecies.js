@@ -1,65 +1,9 @@
-import { useState, useEffect } from 'react';
+// components/FeaturedSpecies.js
 import Image from 'next/image';
 import Link from 'next/link';
-import { db } from '../../firebase-config';
-import { collection, getDocs } from 'firebase/firestore';
 
-const FeaturedSpecies = () => {
-  const [featuredSpecies, setFeaturedSpecies] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchFeaturedSpecies = async () => {
-      try {
-        console.log('Fetching featured species...');
-        const speciesRef = collection(db, 'species');
-        const speciesSnapshot = await getDocs(speciesRef);
-
-        if (speciesSnapshot.empty) {
-          console.log('No species found in the database');
-          setError('No species found in the database');
-        } else {
-          const speciesData = speciesSnapshot.docs
-            .map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }))
-            .filter((species) => species.image);
-
-          if (speciesData.length === 0) {
-            console.log('No species with valid images found');
-            setError('No species with valid images found');
-          } else {
-            const randomIndex = Math.floor(Math.random() * speciesData.length);
-            const selectedSpecies = speciesData[randomIndex];
-
-            console.log('Selected featured species:', selectedSpecies);
-            setFeaturedSpecies(selectedSpecies);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching featured species:', error);
-        setError('Error fetching featured species');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFeaturedSpecies();
-  }, []);
-
-  console.log('Featured Species component rendered');
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  if (!featuredSpecies) {
+const FeaturedSpecies = ({ species }) => {
+  if (!species) {
     return <div>No featured species available</div>;
   }
 
@@ -73,21 +17,23 @@ const FeaturedSpecies = () => {
           <div className="absolute inset-0">
             <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-black opacity-70"></div>
           </div>
-          <div className="md:w-1/2 relative z-10">
-            <Image
-              src={featuredSpecies.image}
-              alt={`${featuredSpecies.genus} ${featuredSpecies.species}`}
-              width={400}
-              height={400}
-              className="w-full h-auto rounded-lg mb-4 md:mb-0 shadow-lg transform -rotate-3"
-            />
-          </div>
+          {species.image && (
+            <div className="md:w-1/2 relative z-10">
+              <Image
+                src={species.image}
+                alt={`${species.genus} ${species.species}`}
+                width={400}
+                height={400}
+                className="w-full h-auto rounded-lg mb-4 md:mb-0 shadow-lg transform -rotate-3"
+              />
+            </div>
+          )}
           <div className="md:w-1/2 md:pl-8 relative z-10">
             <h3 className="text-3xl font-bold mb-2 text-white">
-              {featuredSpecies.genus} {featuredSpecies.species}
+              {species.genus} {species.species}
             </h3>
-            <p className="text-zinc-300 mb-4">{featuredSpecies.description}</p>
-            <Link href={`/species/${featuredSpecies.slug}`} legacyBehavior>
+            <p className="text-zinc-300 mb-4">{species.description}</p>
+            <Link href={`/species/${species.slug}`} legacyBehavior>
               <a className="inline-block bg-red-600 text-white px-6 py-3 rounded-md hover:bg-red-700 transition duration-300 font-bold uppercase tracking-wider">
                 Learn More
               </a>

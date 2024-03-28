@@ -6,13 +6,7 @@ const NotFoundPage = () => {
   return (
     <div className="relative min-h-screen">
       <div className="absolute inset-0">
-        <Image
-          src="/404.png"
-          alt="Web Developer Tangled in Webbing"
-          layout="fill"
-          objectFit="cover"
-          quality={100}
-        />
+      <Image src="/404.png" alt="Web Developer Tangled in Webbing" fill style={{ objectFit: 'cover' }} quality={100} />
       </div>
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen">
         <div className="bg-black bg-opacity-70 p-8 rounded-lg text-center">
