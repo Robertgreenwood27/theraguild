@@ -2,30 +2,41 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { storage, db } from '../../../../firebase-config';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { useAuth } from '../../../components/AuthProvider';
 import HeaderTwo from '@/components/HeaderTwo';
+import { getCache } from '../../../cacheService';
 
 export async function getServerSideProps(context) {
   const { slug } = context.params;
+  const cache = getCache();
+
+  // Check if the species data is available in the cache
+  const cachedSpeciesData = await cache.get(`species:${slug}`);
+  if (cachedSpeciesData) {
+    return {
+      props: {
+        species: JSON.parse(cachedSpeciesData),
+      },
+    };
+  }
 
   try {
-    const speciesQuery = query(collection(db, 'species'), where('slug', '==', slug));
-    const speciesSnapshot = await getDocs(speciesQuery);
+    const speciesRef = doc(db, 'species', slug);
+    const speciesSnap = await getDoc(speciesRef);
 
-    if (speciesSnapshot.empty) {
+    if (!speciesSnap.exists()) {
       return { notFound: true };
     }
 
-    const speciesData = speciesSnapshot.docs[0].data();
-    const speciesId = speciesSnapshot.docs[0].id;
+    const speciesData = { id: speciesSnap.id, ...speciesSnap.data() };
+
+    // Store the fetched species data in the cache
+    await cache.set(`species:${slug}`, JSON.stringify(speciesData), 'EX', 3600);
 
     return {
       props: {
-        species: {
-          id: speciesId,
-          ...speciesData,
-        },
+        species: speciesData,
       },
     };
   } catch (error) {
@@ -106,13 +117,15 @@ const EditSpeciesPage = ({ species }) => {
       const speciesData = {};
 
       for (const key in formData) {
-        if (formData[key] !== '' && formData[key] !== undefined) {
+        if (formData[key] !== species[key]) {
           speciesData[key] = formData[key];
         }
       }
 
       // Set the updated gallery images in speciesData
-      speciesData.images = galleryImages;
+      if (galleryImages !== species.images) {
+        speciesData.images = galleryImages;
+      }
 
       // Check if a new primary image is selected
       if (Array.isArray(formData.image) && formData.image.length > 0) {
@@ -125,12 +138,12 @@ const EditSpeciesPage = ({ species }) => {
         const primaryImageUrl = await getDownloadURL(snapshot.ref);
         speciesData.image = primaryImageUrl;
       } else {
-        // No new primary image selected, use the existing URL from species data or formData
-        speciesData.image = species.image || formData.image;
+        // No new primary image selected, use the existing URL from species data
+        speciesData.image = species.image;
       }
 
       const currentTimestamp = new Date().toISOString();
-      speciesData.editedAt = currentTimestamp; // Set the editedAt field to the current timestamp
+      speciesData.editedAt = currentTimestamp;
 
       console.log('Form Data:', formData);
       console.log('Species Data:', speciesData);

@@ -18,52 +18,47 @@ export async function getServerSideProps(context) {
   const { slug } = context.params;
   const cache = getCache();
 
-  // Try to get the species data from the cache
+  // Check if the species data is available in the cache
   const cachedSpeciesData = await cache.get(`species:${slug}`);
   if (cachedSpeciesData) {
-    const speciesData = JSON.parse(cachedSpeciesData);
     return {
       props: {
-        species: speciesData,
+        species: JSON.parse(cachedSpeciesData),
       },
     };
   }
 
-  // If not found in the cache, fetch from the database
-  let db;
   try {
     const firebaseAdmin = await initAdmin();
-    db = firebaseAdmin.firestore();
-  } catch (error) {
-    console.error('Firebase admin initialization error:', error);
-    return { notFound: true };
-  }
+    const db = firebaseAdmin.firestore();
 
-  let speciesData = null;
-
-  try {
     const speciesRef = db.collection('species').where('slug', '==', slug);
     const snapshot = await speciesRef.get();
+
     if (snapshot.empty) {
-      console.log('No matching documents.');
       return { notFound: true };
     }
-    snapshot.forEach(doc => {
-      speciesData = { id: doc.id, ...doc.data() };
-    });
+
+    const speciesData = snapshot.docs[0].data();
+    const speciesId = snapshot.docs[0].id;
+
+    const species = {
+      id: speciesId,
+      ...speciesData,
+    };
 
     // Store the fetched species data in the cache
-    await cache.set(`species:${slug}`, JSON.stringify(speciesData), 'EX', 3600); // Cache for 1 hour
+    await cache.set(`species:${slug}`, JSON.stringify(species), 'EX', 3600);
+
+    return {
+      props: {
+        species,
+      },
+    };
   } catch (error) {
-    console.error('Error getting documents:', error);
+    console.error('Error fetching species data:', error);
     return { notFound: true };
   }
-
-  return {
-    props: {
-      species: speciesData,
-    },
-  };
 }
 
 const InfoSection = ({ title, content, missingText }) => (
