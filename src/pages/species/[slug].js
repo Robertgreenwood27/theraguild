@@ -5,7 +5,8 @@ import Chat from '@/components/Chat';
 import HeaderTwo from '@/components/HeaderTwo';
 import { initAdmin } from '../../../firebaseAdmin';
 import Link from 'next/link';
-import { getCache } from '../../cacheService'; // Added cacheService import
+import { getCache } from '../../cacheService';
+import { sortedSpeciesList } from '../../lib/speciesList';
 
 const MissingData = ({ children }) => (
   <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-md">
@@ -15,7 +16,7 @@ const MissingData = ({ children }) => (
 
 export async function getServerSideProps(context) {
   const { slug } = context.params;
-  const cache = getCache(); // Use cache service
+  const cache = getCache();
 
   // Try to get the species data from the cache
   const cachedSpeciesData = await cache.get(`species:${slug}`);
@@ -24,12 +25,11 @@ export async function getServerSideProps(context) {
     return {
       props: {
         species: speciesData,
-        allSpecies: [], // We'll fetch this separately
       },
     };
   }
 
-  // If not found in the cache, continue to fetch from the database
+  // If not found in the cache, fetch from the database
   let db;
   try {
     const firebaseAdmin = await initAdmin();
@@ -40,7 +40,6 @@ export async function getServerSideProps(context) {
   }
 
   let speciesData = null;
-  let allSpecies = [];
 
   try {
     const speciesRef = db.collection('species').where('slug', '==', slug);
@@ -53,16 +52,6 @@ export async function getServerSideProps(context) {
       speciesData = { id: doc.id, ...doc.data() };
     });
 
-    // Fetch all species from the cache or database
-    const cachedAllSpecies = await cache.get('allSpecies');
-    if (cachedAllSpecies) {
-      allSpecies = JSON.parse(cachedAllSpecies);
-    } else {
-      const allSpeciesSnapshot = await db.collection('species').get();
-      allSpecies = allSpeciesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      await cache.set('allSpecies', JSON.stringify(allSpecies), 'EX', 3600); // Cache for 1 hour
-    }
-
     // Store the fetched species data in the cache
     await cache.set(`species:${slug}`, JSON.stringify(speciesData), 'EX', 3600); // Cache for 1 hour
   } catch (error) {
@@ -73,7 +62,6 @@ export async function getServerSideProps(context) {
   return {
     props: {
       species: speciesData,
-      allSpecies: allSpecies,
     },
   };
 }
@@ -93,21 +81,14 @@ const InfoSection = ({ title, content, missingText }) => (
   </div>
 );
 
-const SpeciesDetail = ({ species, allSpecies }) => {
+const SpeciesDetail = ({ species }) => {
   const router = useRouter();
 
-  const sortedSpecies = allSpecies.sort((a, b) => {
-    if (a.genus === b.genus) {
-      return a.species.localeCompare(b.species);
-    }
-    return a.genus.localeCompare(b.genus);
-  });
-
-  const currentIndex = sortedSpecies.findIndex(
+  const currentIndex = sortedSpeciesList.findIndex(
     (s) => s.slug === species.slug
   );
-  const prevSpecies = sortedSpecies[currentIndex - 1];
-  const nextSpecies = sortedSpecies[currentIndex + 1];
+  const prevSpecies = sortedSpeciesList[currentIndex - 1];
+  const nextSpecies = sortedSpeciesList[currentIndex + 1];
 
   if (router.isFallback) {
     return <div>Loading...</div>;
@@ -119,22 +100,22 @@ const SpeciesDetail = ({ species, allSpecies }) => {
       <div className="species-detail bg-gradient-to-b from-zinc-900 to-black min-h-screen">
         <section className="hero py-16">
           <div className="container mx-auto">
-          <div className="flex justify-between items-center mb-8">
-      {prevSpecies && (
-        <Link href={`/species/${prevSpecies.slug}`} legacyBehavior>
-          <a className="text-red-500 hover:text-red-700">
-            &#8592; Prev: {prevSpecies.genus} {prevSpecies.species}
-          </a>
-        </Link>
-      )}
-      {nextSpecies && (
-        <Link href={`/species/${nextSpecies.slug}`} legacyBehavior>
-          <a className="text-red-500 hover:text-red-700">
-            Next: {nextSpecies.genus} {nextSpecies.species} &#8594;
-          </a>
-        </Link>
-      )}
-    </div>
+            <div className="flex justify-between items-center mb-8">
+              {prevSpecies && (
+                <Link href={`/species/${prevSpecies.slug}`} legacyBehavior>
+                  <a className="text-red-500 hover:text-red-700">
+                    &#8592; Prev: {prevSpecies.genus} {prevSpecies.species}
+                  </a>
+                </Link>
+              )}
+              {nextSpecies && (
+                <Link href={`/species/${nextSpecies.slug}`} legacyBehavior>
+                  <a className="text-red-500 hover:text-red-700">
+                    Next: {nextSpecies.genus} {nextSpecies.species} &#8594;
+                  </a>
+                </Link>
+              )}
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               <div>
                 <h1 className="text-5xl md:text-6xl font-bold mb-4 text-white">
@@ -145,24 +126,24 @@ const SpeciesDetail = ({ species, allSpecies }) => {
                 )}
               </div>
               <section className="mb-8">
-    <h2 className="text-2xl font-bold mb-2 text-red-500">How to Say It</h2>
-    {species.genusHowToSay || species.speciesHowToSay ? (
-      <div className="text-zinc-300">
-        {species.genusHowToSay && (
-          <p>
-            {species.genusHowToSay}
-          </p>
-        )}
-        {species.speciesHowToSay && (
-          <p>
-            {species.speciesHowToSay}
-          </p>
-        )}
-      </div>
-    ) : (
-      <MissingData>No pronunciation information available</MissingData>
-    )}
-  </section>
+                <h2 className="text-2xl font-bold mb-2 text-red-500">How to Say It</h2>
+                {species.genusHowToSay || species.speciesHowToSay ? (
+                  <div className="text-zinc-300">
+                    {species.genusHowToSay && (
+                      <p>
+                        {species.genusHowToSay}
+                      </p>
+                    )}
+                    {species.speciesHowToSay && (
+                      <p>
+                        {species.speciesHowToSay}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <MissingData>No pronunciation information available</MissingData>
+                )}
+              </section>
               <div>
                 {species.image ? (
                   <div className="relative">
@@ -192,7 +173,8 @@ const SpeciesDetail = ({ species, allSpecies }) => {
                     <InfoSection
                       title="Description"
                       content={species.description}
-                      missingText="No description available"                    />
+                      missingText="No description available"
+                    />
                     <InfoSection
                       title="Distribution"
                       content={species.distribution}
@@ -204,7 +186,8 @@ const SpeciesDetail = ({ species, allSpecies }) => {
                       missingText="No habitat information available"
                     />
                     <InfoSection
-                      title="Size"                      content={
+                      title="Size"
+                      content={
                         <>
                           {species.maxBodyLength && (
                             <p className="text-zinc-300">

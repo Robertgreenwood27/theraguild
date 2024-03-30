@@ -1,12 +1,14 @@
 import "@/styles/globals.css";
-import { AuthProvider } from '../components/AuthProvider'; // Update this path with the path to your AuthProvider component
+import { AuthProvider } from '../components/AuthProvider';
+import { Analytics } from "@vercel/analytics/react";
 
 export default function App({ Component, pageProps }) {
   return (
-    <AuthProvider>
-      <Component {...pageProps} />
-    </AuthProvider>
+    <>
+      <AuthProvider>
+        <Component {...pageProps} />
+      </AuthProvider>
+      <Analytics />
+    </>
   );
 }
-
-

@@ -8,29 +8,10 @@ import RecentlyAddedSpecies from '../components/RecentlyAddedSpecies';
 import CtaSection from '../components/CtaSection';
 import { initAdmin } from '../../firebaseAdmin';
 import { getCache } from '../cacheService';
+import { unsortedSpeciesList, sortedSpeciesList } from '../lib/speciesList';
 
 export async function getServerSideProps() {
-  // Initialize cache for all species, featured, and recently added species
   const cache = getCache();
-
-  const fetchAllSpecies = async () => {
-    const cachedData = await cache.get('allSpecies');
-    if (cachedData) {
-      return JSON.parse(cachedData);
-    }
-
-    const app = await initAdmin();
-    const db = app.firestore();
-    const speciesSnapshot = await db.collection('species').get();
-    const speciesData = speciesSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    await cache.set('allSpecies', JSON.stringify(speciesData), 'EX', 3600); // Cache for 1 hour
-
-    return speciesData;
-  };
 
   const fetchFeaturedSpecies = async () => {
     const cachedData = await cache.get('featuredSpecies');
@@ -38,25 +19,21 @@ export async function getServerSideProps() {
       return JSON.parse(cachedData);
     }
 
+    const featuredSpecies = sortedSpeciesList[Math.floor(Math.random() * sortedSpeciesList.length)];
     const app = await initAdmin();
     const db = app.firestore();
-    const featuredSpeciesSnapshot = await db
-      .collection('species')
-      .where('image', '!=', '') // Filter species with non-empty image URLs
-      .limit(1)
-      .get();
+    const speciesQuery = db.collection('species')
+      .where('genus', '==', featuredSpecies.genus)
+      .where('species', '==', featuredSpecies.species);
+    const speciesSnapshot = await speciesQuery.get();
 
-    if (featuredSpeciesSnapshot.empty) {
-      console.log('No species with valid images found');
+    if (speciesSnapshot.empty) {
+      console.log('Featured species not found in the database');
       return null;
     }
 
-    const featuredSpeciesData = featuredSpeciesSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }))[0];
-
-    await cache.set('featuredSpecies', JSON.stringify(featuredSpeciesData), 'EX', 3600); // Cache for 1 hour
+    const featuredSpeciesData = { id: speciesSnapshot.docs[0].id, ...speciesSnapshot.docs[0].data() };
+    await cache.set('featuredSpecies', JSON.stringify(featuredSpeciesData), 'EX', 3600);
 
     return featuredSpeciesData;
   };
@@ -67,37 +44,34 @@ export async function getServerSideProps() {
       return JSON.parse(cachedData);
     }
 
+    const recentlyAddedSpecies = unsortedSpeciesList.slice(-3);
     const app = await initAdmin();
     const db = app.firestore();
-    const recentlyAddedSpeciesSnapshot = await db
-      .collection('species')
-      .orderBy('createdAt', 'desc')
-      .limit(3)
-      .get();
+    const recentlyAddedSpeciesData = [];
 
-    if (recentlyAddedSpeciesSnapshot.empty) {
-      console.log('No recently added species found');
-      return [];
+    for (const species of recentlyAddedSpecies) {
+      const speciesQuery = db.collection('species')
+        .where('genus', '==', species.genus)
+        .where('species', '==', species.species);
+      const speciesSnapshot = await speciesQuery.get();
+
+      if (!speciesSnapshot.empty) {
+        recentlyAddedSpeciesData.push({ id: speciesSnapshot.docs[0].id, ...speciesSnapshot.docs[0].data() });
+      }
     }
 
-    const recentlyAddedSpeciesData = recentlyAddedSpeciesSnapshot.docs
-      .map((doc) => ({ id: doc.id, ...doc.data() }))
-      .filter((species) => species.image); // Filter species with non-empty image URLs
-
-    await cache.set('recentlyAddedSpecies', JSON.stringify(recentlyAddedSpeciesData), 'EX', 3600); // Cache for 1 hour
+    await cache.set('recentlyAddedSpecies', JSON.stringify(recentlyAddedSpeciesData), 'EX', 3600);
 
     return recentlyAddedSpeciesData;
   };
 
-  const [allSpecies, featuredSpecies, recentlyAddedSpecies] = await Promise.all([
-    fetchAllSpecies(),
+  const [featuredSpecies, recentlyAddedSpecies] = await Promise.all([
     fetchFeaturedSpecies(),
     fetchRecentlyAddedSpecies(),
   ]);
 
   return {
     props: {
-      allSpecies,
       featuredSpecies,
       recentlyAddedSpecies,
     },
@@ -105,8 +79,8 @@ export async function getServerSideProps() {
 }
 
 
-export default function LandingPage({ allSpecies, featuredSpecies, recentlyAddedSpecies }) {
-    const { user } = useAuth();
+export default function LandingPage({ featuredSpecies, recentlyAddedSpecies }) {
+  const { user } = useAuth();
 
   return (
     <div className="bg-zinc-900 text-white min-h-screen">
@@ -121,14 +95,14 @@ export default function LandingPage({ allSpecies, featuredSpecies, recentlyAdded
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-5xl font-bold mb-8 text-red-500 font-rock-salt">Welcome to ArachneGuild</h1>
         <p className="text-2xl mb-12 text-zinc-300">Discover the world&apos;s (soon to be) largest tarantula database.</p>
-        <SearchBar species={allSpecies} />
-        <section className="my-16">
-          <FeaturedSpecies species={featuredSpecies} />
-        </section>
-        <section className="my-16">
-          <h2 className="text-4xl font-bold mb-8 text-red-500 font-rock-salt">Check These Out</h2>
-          <RecentlyAddedSpecies species={recentlyAddedSpecies} />
-        </section>
+        <SearchBar />
+    <section className="my-16">
+      <FeaturedSpecies species={featuredSpecies} />
+    </section>
+    <section className="my-16">
+      <h2 className="text-4xl font-bold mb-8 text-red-500 font-rock-salt">Check These Out</h2>
+      <RecentlyAddedSpecies species={recentlyAddedSpecies} />
+    </section>
         {!user && (
           <section className="my-16">
             <CtaSection />

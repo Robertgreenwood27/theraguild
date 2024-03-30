@@ -1,18 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
+import { sortedSpeciesList } from '@/lib/speciesList';
 
-const SearchBar = ({ species }) => {
+const SearchBar = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredSpecies, setFilteredSpecies] = useState(species || []);
+  const [filteredSpecies, setFilteredSpecies] = useState(sortedSpeciesList);
   const [showDropdown, setShowDropdown] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    const filtered = species.filter((s) =>
-      `${s.genus} ${s.species}`.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFilteredSpecies(filtered);
-  }, [searchQuery, species]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -22,8 +16,14 @@ const SearchBar = ({ species }) => {
   };
 
   const handleInputChange = (e) => {
-    setSearchQuery(e.target.value);
+    const query = e.target.value;
+    setSearchQuery(query);
     setShowDropdown(true);
+
+    const filtered = sortedSpeciesList.filter((s) =>
+      `${s.genus} ${s.species}`.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredSpecies(filtered);
   };
 
   const handleSpeciesClick = (selectedSpecies) => {
@@ -67,10 +67,10 @@ const SearchBar = ({ species }) => {
         </button>
       </form>
       {showDropdown && filteredSpecies.length > 0 && (
-        <ul className="absolute z-10 w-full mt-1 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg overflow-auto max-h-60">
+        <ul className="absolute z-50 w-full mt-1 bg-zinc-800 border border-zinc-700 rounded-md shadow-lg overflow-auto max-h-60">
           {filteredSpecies.map((species) => (
             <li
-              key={species.id}
+              key={species.slug}
               onClick={() => handleSpeciesClick(species)}
               className="px-4 py-2 cursor-pointer text-zinc-200 hover:bg-gradient-to-r hover:from-red-600 hover:to-black transition duration-300"
             >
