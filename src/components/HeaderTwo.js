@@ -1,24 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { useAuth } from '@/components/AuthProvider';
+import { supabase } from '@/lib/supabaseClient';
 
 const HeaderTwo = ({ noBackground = false }) => {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-
-  const auth = getAuth();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, [auth]);
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     } catch (error) {
       console.error("Sign Out Error:", error);
     }
@@ -89,7 +82,7 @@ const HeaderTwo = ({ noBackground = false }) => {
               </Link>
               {user ? (
                 <>
-                  <span className="block px-4 py-2 text-zinc-100">Welcome, {user.displayName || user.email}!</span>
+                  <span className="block px-4 py-2 text-zinc-100">Welcome, {user.email}!</span>
                   <button
                     onClick={handleLogout}
                     className="block w-full text-left px-4 py-2 text-zinc-100 hover:bg-gradient-to-r hover:from-red-600 hover:to-black transition duration-300"

@@ -1,19 +1,19 @@
 import { useState } from 'react';
-import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useAuth } from '@/components/AuthProvider';
+import { supabase } from '@/lib/supabaseClient';
 
 const Header = () => {
-  const [user, setUser] = useState(null);
-  const auth = getAuth();
-
-  onAuthStateChanged(auth, (currentUser) => {
-    setUser(currentUser);
-  });
+  const { user } = useAuth();
+  const router = useRouter();
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      router.push('/');
     } catch (error) {
       console.error("Sign Out Error:", error);
     }
@@ -87,7 +87,7 @@ const Header = () => {
           {user ? (
             <>
               <span className="text-white mr-4">
-                Welcome, {user.displayName || user.email}!
+                Welcome, {user.email}!
               </span>
               <button
                 onClick={handleLogout}

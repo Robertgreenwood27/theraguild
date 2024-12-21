@@ -4,7 +4,18 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['firebasestorage.googleapis.com'],
+    domains: [
+      'firebasestorage.googleapis.com',
+      'euxtzzuhwcesplbizhjc.supabase.co', // Your Supabase project URL
+    ],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'euxtzzuhwcesplbizhjc.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
   },
 };
 

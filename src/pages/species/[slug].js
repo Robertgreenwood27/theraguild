@@ -1,10 +1,11 @@
 // pages/species/[slug].js
-import { useRouter } from 'next/router';
+import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import Chat from '@/components/Chat';
 import HeaderTwo from '@/components/HeaderTwo';
-import { initAdmin } from '../../../firebaseAdmin';
-import Link from 'next/link';
+import { supabase } from '@/lib/supabaseClient';
 import { getCache } from '../../cacheService';
 import { sortedSpeciesList } from '../../lib/speciesList';
 
@@ -13,53 +14,6 @@ const MissingData = ({ children }) => (
     <span className="font-bold">Missing Data:</span> {children}
   </div>
 );
-
-export async function getServerSideProps(context) {
-  const { slug } = context.params;
-  const cache = getCache();
-
-  // Check if the species data is available in the cache
-  const cachedSpeciesData = await cache.get(`species:${slug}`);
-  if (cachedSpeciesData) {
-    return {
-      props: {
-        species: JSON.parse(cachedSpeciesData),
-      },
-    };
-  }
-
-  try {
-    const firebaseAdmin = await initAdmin();
-    const db = firebaseAdmin.firestore();
-
-    const speciesRef = db.collection('species').where('slug', '==', slug);
-    const snapshot = await speciesRef.get();
-
-    if (snapshot.empty) {
-      return { notFound: true };
-    }
-
-    const speciesData = snapshot.docs[0].data();
-    const speciesId = snapshot.docs[0].id;
-
-    const species = {
-      id: speciesId,
-      ...speciesData,
-    };
-
-    // Store the fetched species data in the cache
-    await cache.set(`species:${slug}`, JSON.stringify(species), 'EX', 3600);
-
-    return {
-      props: {
-        species,
-      },
-    };
-  } catch (error) {
-    console.error('Error fetching species data:', error);
-    return { notFound: true };
-  }
-}
 
 const InfoSection = ({ title, content, missingText }) => (
   <div className="mb-8">
@@ -79,22 +33,22 @@ const InfoSection = ({ title, content, missingText }) => (
 const SpeciesDetail = ({ species }) => {
   const router = useRouter();
 
+  if (router.isFallback) {
+    return <div>Loading...</div>;
+  }
+
   const currentIndex = sortedSpeciesList.findIndex(
     (s) => s.slug === species.slug
   );
   const prevSpecies = sortedSpeciesList[currentIndex - 1];
   const nextSpecies = sortedSpeciesList[currentIndex + 1];
 
-  if (router.isFallback) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <>
       <HeaderTwo />
       <div className="species-detail bg-gradient-to-b from-zinc-900 to-black min-h-screen">
         <section className="hero py-16">
-          <div className="container mx-auto">
+          <div className="container mx-auto px-4">
             <div className="flex justify-between items-center mb-8">
               {prevSpecies && (
                 <Link href={`/species/${prevSpecies.slug}`} legacyBehavior>
@@ -125,14 +79,10 @@ const SpeciesDetail = ({ species }) => {
                 {species.genusHowToSay || species.speciesHowToSay ? (
                   <div className="text-zinc-300">
                     {species.genusHowToSay && (
-                      <p>
-                        {species.genusHowToSay}
-                      </p>
+                      <p>{species.genusHowToSay}</p>
                     )}
                     {species.speciesHowToSay && (
-                      <p>
-                        {species.speciesHowToSay}
-                      </p>
+                      <p>{species.speciesHowToSay}</p>
                     )}
                   </div>
                 ) : (
@@ -160,7 +110,7 @@ const SpeciesDetail = ({ species }) => {
         </section>
 
         <section className="species-info py-16">
-          <div className="container mx-auto">
+          <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="md:col-span-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -275,5 +225,46 @@ const SpeciesDetail = ({ species }) => {
     </>
   );
 };
+
+export async function getServerSideProps(context) {
+  const { slug } = context.params;
+  const cache = getCache();
+
+  // Check if the species data is available in the cache
+  const cachedSpeciesData = await cache.get(`species:${slug}`);
+  if (cachedSpeciesData) {
+    return {
+      props: {
+        species: JSON.parse(cachedSpeciesData),
+      },
+    };
+  }
+
+  try {
+    const { data: speciesData, error } = await supabase
+      .from('species')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+
+    if (error) throw error;
+
+    if (!speciesData) {
+      return { notFound: true };
+    }
+
+    // Store the fetched species data in the cache
+    await cache.set(`species:${slug}`, JSON.stringify(speciesData), 'EX', 3600);
+
+    return {
+      props: {
+        species: speciesData,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching species data:', error);
+    return { notFound: true };
+  }
+}
 
 export default SpeciesDetail;
